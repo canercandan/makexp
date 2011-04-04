@@ -17,12 +17,17 @@
 #
 
 class Stat:
-    def __call__(self, value): pass
+    def __call__(self, tree): pass
 
 class SampleStat(Stat):
-    def __call__(self, value):
+    def __call__(self, tree):
         pass
 
 class CommandStat(Stat):
-    def __call__(self, value):
+    def __call__(self, tree):
         pass
+
+class CostStat(Stat):
+    def __call__(self, tree):
+        filename = tree['PlAN_FILENAME']
+        print 'CostStat: %s' % filename
