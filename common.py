@@ -76,3 +76,20 @@ def list_verbose_levels():
     for keys in LEVELS.keys():
         print "\t", keys
     sys.exit()
+
+class Base:
+    """
+    This is the base for all classes.
+    """
+
+    def __init__(self, parser):
+        self.parser = parser
+
+        name = str(str(self).split('.')[1].split()[0])
+        self.logger = logging.getLogger(name)
+
+    def __call__(self, tree = {}):
+        self.logger.debug('begins')
+        options, args = self.parser.parse_args()
+        self.callit(options, tree)
+        self.logger.debug('ends')
