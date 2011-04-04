@@ -28,35 +28,68 @@ class Browser:
     Base class for Browser classes
     """
 
-    def __init__(self, parser, browser=None):
+    def __init__(self, parser, browser=None, stat=None):
         self.parser = parser
         self.browsers = []
+        self.stats = []
 
         if browser:
             self.browsers.append(browser)
+
+        if stat:
+            self.stats.append(stat)
 
         name = str(str(self).split('.')[1].split()[0])
         self.logger = logging.getLogger(name)
 
     def __call__(self, tree = {}):
+        """
+        Here's the main method used by all browser classes in order to update the tree passed as argument.
+        """
+
         self.logger.debug('begins')
         options, args = self.parser.parse_args()
         self.callit(options, tree.copy())
+        self.statAll(tree)
         self.logger.debug('ends')
 
     def add(self, browser):
+        """
+        Useful if you want to linked several calls to add method. The return instance is the new added browser in order to add the next browser into this last.
+        Example: browser.add(browser1).add(browser2).add(browser3)...
+        """
+
         assert browser != None
         self.browsers.append(browser)
         return browser
 
     def addC(self, browser):
+        """
+        Useful if you want to linked several calls to add method together but in using the same instance
+        Example: browser.addC(browser1).addC(browser2).addC(browser3)...
+        """
+
         assert browser != None
         self.browsers.append(browser)
+        return self
+
+    def addStats(self, stats):
+        assert stats != None
+        self.stats += stats
+        return self
+
+    def addMany(self, browsers):
+        assert browsers != None
+        self.browsers += browsers
         return self
 
     def browseAll(self, tree):
         for browser in self.browsers:
             browser(tree)
+
+    def statAll(self, tree):
+        for stat in self.stats:
+            stat(tree)
 
 class DummyBrowser(Browser):
     def __init__(self, parser):
@@ -65,8 +98,8 @@ class DummyBrowser(Browser):
     def callit(self, options, tree): pass
 
 class ExecuteBrowser(Browser):
-    def __init__(self, parser, seed=0, runmax=0, gensteady=50, timelimit=1800):
-        Browser.__init__(self, parser)
+    def __init__(self, parser, seed=0, runmax=0, gensteady=50, timelimit=1800, stat=None):
+        Browser.__init__(self, parser, stat=stat)
 
         parser.add_option('-s', '--seed', type='int', default=seed, help='with seed fixed, seed=0 means seed defined randomly')
         parser.add_option('-M', '--runmax', type='int', default=runmax, help='with runmax fixed, runmax=0 means no limit')
