@@ -91,13 +91,13 @@ class Browser:
         for stat in self.stats:
             stat(tree)
 
-class DummyBrowser(Browser):
+class Dummy(Browser):
     def __init__(self, parser):
         Browser.__init__(self, parser)
 
     def callit(self, options, tree): pass
 
-class ExecuteBrowser(Browser):
+class Execute(Browser):
     def __init__(self, parser, seed=0, runmax=0, gensteady=50, timelimit=1800, stat=None):
         Browser.__init__(self, parser, stat=stat)
 
@@ -139,7 +139,7 @@ class ExecuteBrowser(Browser):
             p = subprocess.Popen( cmd, shell=True )
             p.wait()
 
-class PopBrowser(Browser):
+class Pop(Browser):
     def __init__(self, parser, popsizes, browser=None):
         Browser.__init__(self, parser, browser)
         self.popsizes = popsizes
@@ -150,7 +150,7 @@ class PopBrowser(Browser):
 
             self.browseAll(tree)
 
-class CoreBrowser(Browser):
+class Core(Browser):
     def __init__(self, parser, coresizes, browser=None, parallelize=True):
         Browser.__init__(self, parser, browser)
 
@@ -165,7 +165,7 @@ class CoreBrowser(Browser):
 
             self.browseAll(tree)
 
-class SequentialBrowser(Browser):
+class Sequential(Browser):
     def __init__(self, parser, browser=None):
         Browser.__init__(self, parser, browser)
 
@@ -175,7 +175,7 @@ class SequentialBrowser(Browser):
 
         self.browseAll(tree)
 
-class MangleBrowser(Browser):
+class Mangle(Browser):
     def __init__(self, parser, browser=None):
         Browser.__init__(self, parser, browser)
 
@@ -187,7 +187,7 @@ class MangleBrowser(Browser):
 
         self.browseAll(tree)
 
-class RestartBrowser(Browser):
+class Restart(Browser):
     def __init__(self, parser, browser=None, restart=False):
         Browser.__init__(self, parser, browser)
 
@@ -199,7 +199,7 @@ class RestartBrowser(Browser):
 
         self.browseAll(tree)
 
-class StartingBrowser(Browser):
+class Starting(Browser):
     def __init__(self, parser, browser=None):
         Browser.__init__(self, parser, browser)
 
@@ -210,7 +210,7 @@ class StartingBrowser(Browser):
 
             self.browseAll(tree)
 
-class DynamicBrowser(Browser):
+class Dynamic(Browser):
     def __init__(self, parser, browser=None, dynamic=False):
         Browser.__init__(self, parser, browser)
 
@@ -222,7 +222,7 @@ class DynamicBrowser(Browser):
 
         self.browseAll(tree)
 
-class SchemaBrowser(Browser):
+class Schema(Browser):
     def __init__(self, parser, browser=None):
         Browser.__init__(self, parser, browser)
 
@@ -233,7 +233,7 @@ class SchemaBrowser(Browser):
 
             self.browseAll(tree)
 
-class RangeBrowser(Browser):
+class Range(Browser):
     def __init__(self, parser, browser=None, nruns=1):
         Browser.__init__(self, parser, browser)
 
@@ -245,7 +245,7 @@ class RangeBrowser(Browser):
 
             self.browseAll(tree)
 
-class CommandBrowser(Browser):
+class Command(Browser):
     def __init__(self, parser, commands, browser=None, binarypath='.'):
         Browser.__init__(self, parser, browser)
 
@@ -259,7 +259,7 @@ class CommandBrowser(Browser):
 
             self.browseAll(tree)
 
-class SampleBrowser(Browser):
+class Sample(Browser):
     def __init__(self, parser, samples, browser=None):
         Browser.__init__(self, parser, browser)
         self.samples = samples

@@ -20,8 +20,7 @@
 
 import optparse, logging, sys, os
 import common
-from browser import *
-from stat import *
+import browsers, stats
 
 logger = logging.getLogger("example")
 
@@ -29,16 +28,16 @@ def main():
 
     parser = optparse.OptionParser()
 
-    do = Do(parser, execute=True)
-    cmd = CommandBrowser(parser, ['ls'], binarypath='/bin')
-    rang = RangeBrowser(parser, nruns=11)
-    schema = DynamicBrowser(parser)
-    sample = SampleBrowser(parser, [("PROBLEM1", "domain1", "instance1")])
-    core = SequentialBrowser(parser)
-    pop = PopBrowser(parser, [1, 2, 4, 8, 16, 32, 64, 128])
-    mangle = MangleBrowser(parser)
-    execute = ExecuteBrowser(parser, seed=1)
-    start = RestartBrowser(parser, restart=True)
+    do = browsers.Do(parser, execute=False)
+    cmd = browsers.Command(parser, ['ls'], binarypath='/bin')
+    rang = browsers.Range(parser, nruns=11)
+    schema = browsers.Dynamic(parser)
+    sample = browsers.Sample(parser, [("PROBLEM1", "domain1", "instance1")])
+    core = browsers.Sequential(parser)
+    pop = browsers.Pop(parser, [1, 2, 4, 8, 16, 32, 64, 128])
+    mangle = browsers.Mangle(parser)
+    execute = browsers.Execute(parser, seed=1)
+    start = browsers.Restart(parser, restart=True)
 
     common.parser(parser)
 

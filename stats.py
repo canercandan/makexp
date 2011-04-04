@@ -19,15 +19,15 @@
 class Stat:
     def __call__(self, tree): pass
 
-class SampleStat(Stat):
+class Sample(Stat):
     def __call__(self, tree):
         pass
 
-class CommandStat(Stat):
+class Command(Stat):
     def __call__(self, tree):
         pass
 
-class CostStat(Stat):
+class Cost(Stat):
     def __call__(self, tree):
-        filename = tree['PlAN_FILENAME']
+        filename = tree['PLAN_FILENAME']
         print 'CostStat: %s' % filename
