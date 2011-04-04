@@ -22,16 +22,19 @@ Browser classes enable to choose the order of experiences you want to test. Some
 
 import optparse, logging, sys, os, subprocess
 from datetime import datetime
+import common
 
-class Browser:
+class Browser(common.Base):
     """
     Base class for Browser classes
     """
 
-    def __init__(self, parser, browser=None, stat=None):
-        self.parser = parser
+    def __init__(self, parser, browser=None, stat=None, tracer=None):
+        common.Base.__init__(self, parser)
+
         self.browsers = []
         self.stats = []
+        self.tracers = []
 
         if browser:
             self.browsers.append(browser)
@@ -39,19 +42,17 @@ class Browser:
         if stat:
             self.stats.append(stat)
 
-        name = str(str(self).split('.')[1].split()[0])
-        self.logger = logging.getLogger(name)
+        if tracer:
+            self.tracers.append(tracer)
 
-    def __call__(self, tree = {}):
+    def callit(self, options, tree):
         """
         Here's the main method used by all browser classes in order to update the tree passed as argument.
         """
 
-        self.logger.debug('begins')
-        options, args = self.parser.parse_args()
-        self.callit(options, tree.copy())
+        self.browse(options, tree.copy())
         self.statAll(tree)
-        self.logger.debug('ends')
+        self.tracerAll(tree)
 
     def add(self, browser):
         """
@@ -78,6 +79,11 @@ class Browser:
         self.stats += stats
         return self
 
+    def addTracers(self, tracers):
+        assert tracers != None
+        self.tracers += tracers
+        return self
+
     def addMany(self, browsers):
         assert browsers != None
         self.browsers += browsers
@@ -91,11 +97,15 @@ class Browser:
         for stat in self.stats:
             stat(tree)
 
+    def tracerAll(self, tree):
+        for tracer in self.tracers:
+            tracer(tree)
+
 class Dummy(Browser):
     def __init__(self, parser):
         Browser.__init__(self, parser)
 
-    def callit(self, options, tree): pass
+    def browse(self, options, tree): pass
 
 class Execute(Browser):
     def __init__(self, parser, seed=0, runmax=0, gensteady=50, timelimit=1800, stat=None):
@@ -106,7 +116,7 @@ class Execute(Browser):
         parser.add_option('-G', '--gensteady', type='int', default=gensteady, help='with gensteady fixed')
         parser.add_option('-T', '--timelimit', type='int', default=timelimit, help='with timelimit fixed')
 
-    def callit(self, options, tree):
+    def browse(self, options, tree):
         if options.runmax:
             tree["RUNMAX"] = options.runmax
 
@@ -144,7 +154,7 @@ class Pop(Browser):
         Browser.__init__(self, parser, browser)
         self.popsizes = popsizes
 
-    def callit(self, options, tree):
+    def browse(self, options, tree):
         for size in self.popsizes:
             tree["POPSIZE"] = size
 
@@ -158,7 +168,7 @@ class Core(Browser):
 
         self.coresizes = coresizes
 
-    def callit(self, options, tree):
+    def browse(self, options, tree):
         for size in self.coresizes:
             tree["CORESIZE"] = size
             tree["PARALLELIZE"] = options.parallelize
@@ -169,7 +179,7 @@ class Sequential(Browser):
     def __init__(self, parser, browser=None):
         Browser.__init__(self, parser, browser)
 
-    def callit(self, options, tree):
+    def browse(self, options, tree):
         tree["CORESIZE"] = 1
         tree["PARALLELIZE"] = False
 
@@ -179,7 +189,7 @@ class Mangle(Browser):
     def __init__(self, parser, browser=None):
         Browser.__init__(self, parser, browser)
 
-    def callit(self, options, tree):
+    def browse(self, options, tree):
         tree["MANGLENAME"] = "%(FIELD)s_%(COMMAND)s_%(SCHEMA)s_S%(POPSIZE)d_C%(CORESIZE)d" % tree
         tree["TIME_FILENAME"] = "%(TIMEDIR)s/%(NAME)s_%(MANGLENAME)s.time.%(NUM)s" % tree
         tree["RES_FILENAME"] = "%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.out.%(NUM)s" % tree
@@ -193,7 +203,7 @@ class Restart(Browser):
 
         parser.add_option('-R', '--restart', action='store_true', default=restart, help='with restarts')
 
-    def callit(self, options, tree):
+    def browse(self, options, tree):
         tree["FIELD"] = "RESTART" if options.restart else ""
         tree["RUNMAX"] = 0 if options.restart else 1
 
@@ -203,7 +213,7 @@ class Starting(Browser):
     def __init__(self, parser, browser=None):
         Browser.__init__(self, parser, browser)
 
-    def callit(self, options, tree):
+    def browse(self, options, tree):
         for field in ["", "RESTART"]:
             tree["FIELD"] = field
             tree["RUNMAX"] = 0 if field == "RESTART" else 1
@@ -216,7 +226,7 @@ class Dynamic(Browser):
 
         parser.add_option('-D', '--dynamic', action='store_true', default=dynamic, help='use the dynamic scheduler in openmp')
 
-    def callit(self, options, tree):
+    def browse(self, options, tree):
         tree["SCHEMA"] = "DYNAMIC" if options.dynamic else "STATIC"
         tree["SCHEMABOOL"] = options.dynamic
 
@@ -226,7 +236,7 @@ class Schema(Browser):
     def __init__(self, parser, browser=None):
         Browser.__init__(self, parser, browser)
 
-    def callit(self, options, tree):
+    def browse(self, options, tree):
         for schema in ["STATIC", "DYNAMIC"]:
             tree["SCHEMA"] = schema
             tree["SCHEMABOOL"] = 1 if schema == "DYNAMIC" else 0
@@ -239,7 +249,7 @@ class Range(Browser):
 
         parser.add_option('-N', '--nruns', type='int', default=nruns, help='give here a number of runs')
 
-    def callit(self, options, tree):
+    def browse(self, options, tree):
         for num in range(1, options.nruns+1):
             tree["NUM"] = num
 
@@ -253,7 +263,7 @@ class Command(Browser):
 
         self.commands = commands
 
-    def callit(self, options, tree):
+    def browse(self, options, tree):
         for command in self.commands:
             tree["COMMAND"] = command
 
@@ -264,7 +274,7 @@ class Sample(Browser):
         Browser.__init__(self, parser, browser)
         self.samples = samples
 
-    def callit(self, options, tree):
+    def browse(self, options, tree):
         for name, domain, instance in self.samples:
             tree["NAME"] = name
             tree["DOMAIN"] = domain
@@ -287,7 +297,7 @@ class Do(Browser):
 
         parser.add_option('-e', '--execute', action='store_true', default=execute, help='execute experiences')
 
-    def callit(self, options, tree):
+    def browse(self, options, tree):
         resdir = "%s/Res" % options.topic
         timedir = "%s/Time" % options.topic
 
