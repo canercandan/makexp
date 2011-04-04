@@ -16,18 +16,50 @@
 # Caner Candan <caner@candan.fr>, http://caner.candan.fr
 #
 
-class Stat:
-    def __call__(self, tree): pass
+from os import listdir
+import common
 
-class Sample(Stat):
-    def __call__(self, tree):
-        pass
+class Stat(common.Base):
+    def __init__(self, parser, tracer=None):
+        common.Base.__init__(self, parser)
 
-class Command(Stat):
-    def __call__(self, tree):
-        pass
+        self.tracer = tracer
 
-class Cost(Stat):
-    def __call__(self, tree):
-        filename = tree['PLAN_FILENAME']
-        print 'CostStat: %s' % filename
+class Fitness(Stat):
+    def __init__(self, parser, tracer, idx, pattern):
+        Stat.__init__(self, parser, tracer)
+
+        self.idx = idx
+        self.pattern = pattern
+
+    def callit(self, options, tree):
+        fitnesses = []
+
+        dirs = listdir(tree['RESDIR'])
+        dirs.sort()
+        for f in dirs:
+            f = '%s/%s' % (tree['RESDIR'], f)
+
+            if tree['PLAN_FILENAME'] in f:
+                data = open(f).readlines()
+
+                if len(data) <= self.idx:
+                    continue
+
+                if self.pattern not in data[self.idx]:
+                    continue
+
+                fitness = int(data[self.idx].split()[2])
+                fitnesses.append(fitness)
+
+        if len(fitnesses) > 0:
+            self.logger.info(fitnesses)
+            self.tracer.add(fitnesses)
+
+class MakeSpan(Fitness):
+    def __init__(self, parser, tracer):
+        Fitness.__init__(self, parser, tracer, 2, 'Makespan')
+
+class TotalCost(Fitness):
+    def __init__(self, parser, tracer):
+        Fitness.__init__(self, parser, tracer, 3, 'TotalCost')
