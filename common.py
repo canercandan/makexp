@@ -77,6 +77,21 @@ def list_verbose_levels():
         print "\t", keys
     sys.exit()
 
+
+from UserDict import UserDict
+class AutoFillingDict(UserDict):
+    """
+    Another kind of dictionnary inheriting from UserDict and returning an empty string whether a key is not found.
+    Thanks to David Mertz.
+    """
+
+    def __init__(self, dict={}):
+        UserDict.__init__(self, dict)
+
+    def __getitem__(self, key):
+        return self.data.get(key, '')
+        #return UserDict.get(self, key, '')
+
 class Base:
     """
     This is the base for all classes.
@@ -88,8 +103,8 @@ class Base:
         name = str(str(self).split('.')[1].split()[0])
         self.logger = logging.getLogger(name)
 
-    def __call__(self, tree = {}):
+    def __call__(self, tree = AutoFillingDict()):
         self.logger.debug('begins')
         options, args = self.parser.parse_args()
-        self.callit(options, tree)
+        self.callit(options, tree.copy())
         self.logger.debug('ends')
