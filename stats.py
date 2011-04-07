@@ -33,6 +33,9 @@ class Fitness(Stat):
         self.pattern = pattern
 
     def callit(self, options, tree):
+        tree['MANGLENAME'] = tree['MANGLENAME_PATTERN'] % tree
+        tree['PLAN_FILENAME'] = tree['PLAN_FILENAME_PATTERN'] % tree
+
         fitnesses = []
 
         dirs = listdir(tree['RESDIR'])
@@ -49,11 +52,10 @@ class Fitness(Stat):
                 if self.pattern not in data[self.idx]:
                     continue
 
-                fitness = int(data[self.idx].split()[2])
+                fitness = int(data[self.idx].split()[-1])
                 fitnesses.append(fitness)
 
         if len(fitnesses) > 0:
-            self.logger.info(fitnesses)
             self.tracer.add(fitnesses)
 
 class MakeSpan(Fitness):
@@ -63,3 +65,37 @@ class MakeSpan(Fitness):
 class TotalCost(Fitness):
     def __init__(self, parser, tracer):
         Fitness.__init__(self, parser, tracer, 3, 'TotalCost')
+
+class SpeedUp(Stat):
+    def __init__(self, parser, tracer, idx, pattern):
+        Stat.__init__(self, parser, tracer)
+
+        self.idx = idx
+        self.pattern = pattern
+
+    def callit(self, options, tree):
+        tree['MANGLENAME'] = tree['MANGLENAME_PATTERN'] % tree
+
+        diffs = []
+
+        for num in range(1, options.nruns+1):
+            tree['NUM'] = num
+            tree['TIME_FILENAME'] = tree['TIME_FILENAME_PATTERN'] % tree
+
+            data = open(tree['TIME_FILENAME']).readlines()
+
+            if len(data) <= self.idx:
+                continue
+
+            if self.pattern not in data[self.idx]:
+                continue
+
+            diff = float(data[self.idx].split()[-1][:-1]) / tree["CORESIZE"] * 1/100
+            diffs.append(diff)
+
+        if len(diffs) > 0:
+            self.tracer.add(diffs)
+
+class TimeSpeedUp(SpeedUp):
+    def __init__(self, parser, tracer):
+        SpeedUp.__init__(self, parser, tracer, 3, 'Percent of CPU this job got')
