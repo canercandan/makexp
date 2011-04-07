@@ -35,7 +35,6 @@ def main():
     sample = browsers.Sample(parser, [("PROBLEM1", "domain1", "instance1")])
     core = browsers.Sequential(parser)
     pop = browsers.Pop(parser, [1, 2, 4, 8, 16, 32, 64, 128])
-    mangle = browsers.Mangle(parser)
     execute = browsers.Execute(parser, seed=1)
     start = browsers.Restart(parser, restart=True)
 
@@ -49,7 +48,6 @@ def main():
         .add(core)\
         .add(pop)\
         .add(start)\
-        .add(mangle)\
         .add(execute)
 
     do()
