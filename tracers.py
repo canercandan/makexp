@@ -22,30 +22,38 @@ class Tracer(common.Base):
     def __init__(self, parser):
         common.Base.__init__(self, parser)
 
-        parser.add_option('-p', '--plot', action='store_true', default=False, help='plot data')
-
         self.values = []
 
     def callit(self, options, tree):
+        if not options.plot:
+            return
+
+        if len(self.values) <= 0:
+            return
+
         self.trace(options, tree)
         del self.values[:]
 
     def add(self, value):
         self.values.append(value)
 
-class Fitness(Tracer):
-    def __init__(self, parser):
+class Easy(Tracer):
+    def __init__(self, parser, title=None, xlabel=None, ylabel=None):
         Tracer.__init__(self, parser)
 
-    def trace(self, options, tree):
-        if options.plot:
-            import pylab
+        self.title = title if title else 'notitle'
+        self.xlabel = xlabel
+        self.ylabel = ylabel
 
-            if len(self.values) > 0:
-                pylab.boxplot(self.values)
-                pylab.xlabel('number of runs')
-                pylab.ylabel('fitness')
-                pylab.savefig('output.pdf', format='pdf')
-                pylab.savefig('output.png', format='png')
-                pylab.cla()
-                pylab.clf()
+    def trace(self, options, tree):
+        import pylab
+        pylab.boxplot(self.values)
+        if self.xlabel: pylab.xlabel(self.xlabel)
+        if self.ylabel: pylab.ylabel(self.ylabel)
+
+        filename = '%(NAME)s_%(MANGLENAME_PATTERN)s.pdf' % tree % tree
+
+        pylab.savefig('%s/%s_%s' % (tree["GRAPH_DIR"], self.title, filename), format='pdf')
+
+        pylab.cla()
+        pylab.clf()
