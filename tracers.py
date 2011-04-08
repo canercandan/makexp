@@ -54,7 +54,7 @@ class Easy(Tracer):
         tree['MANGLENAME'] = options.manglename_pattern % tree
         filename = '%(NAME)s_%(MANGLENAME)s.pdf' % tree
 
-        pylab.savefig('%s/%s_%s' % (tree["GRAPH_DIR"], self.title, filename), format='pdf')
+        pylab.savefig('%s/%s_%s' % (tree["GRAPHDIR"], self.title, filename), format='pdf')
 
         pylab.cla()
         pylab.clf()

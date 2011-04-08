@@ -108,7 +108,7 @@ class Do(Browser):
     Ugly name I know but called like that for historical reasons
     """
 
-    def __init__(self, parser, browser=None, topic=str(datetime.today()), execute=False, plot=False,
+    def __init__(self, parser, browser=None, topic=None, execute=False, plot=False,
                  manglename_pattern="%(FIELD)s_%(COMMAND)s_%(SCHEMA)s_S%(POPSIZE)d_C%(CORESIZE)d",
                  timefilename_pattern="%(TIMEDIR)s/%(NAME)s_%(MANGLENAME)s.time.%(NUM)s",
                  resfilename_pattern="%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.out.%(NUM)s",
@@ -132,8 +132,10 @@ class Do(Browser):
 
         Browser.__init__(self, parser, browser)
 
-        for char in [' ', ':', '-', '.']: topic = topic.replace(char, '_')
-        parser.add_option('-t', '--topic', default=topic, help='give here a topic name used to create the folder')
+        self.datename = str(datetime.today())
+        for char in [' ', ':', '-', '.']: self.datename = self.datename.replace(char, '_')
+
+        parser.add_option('-t', '--topic', default=topic if topic else self.datename, help='give here a topic name used to create the folder')
 
         parser.add_option('-e', '--execute', action='store_true', default=execute, help='execute experiences')
         parser.add_option('-p', '--plot', action='store_true', default=plot, help='plot data')
@@ -147,20 +149,24 @@ class Do(Browser):
         parser.add_option('-d', '--description', default=description, help='give here a description of your experience. This is saved in README file')
 
     def browse(self, options, tree):
+
+        def makedirs(dirname):
+            try:
+                os.makedirs(dirname)
+            except OSError:
+                pass
+
         tree["TOPIC"] = options.topic
+        tree["DATENAME"] = self.datename
 
         tree["RESDIR"] = "%(TOPIC)s/Res" % tree
         tree["TIMEDIR"] = "%(TOPIC)s/Time" % tree
-        tree["MAKEXPDIR"] = "%(TOPIC)s/makexp" % tree
+        tree["MAKEXPDIR"] = "%(TOPIC)s/makexp_%(DATENAME)s" % tree
+        tree["GRAPHDIR"] = "%(TOPIC)s/graph_%(DATENAME)s" % tree
 
         # create needed directories
         if options.execute:
-            for key in ["RESDIR", "TIMEDIR", "MAKEXPDIR"]:
-                try:
-                    os.makedirs(tree[key])
-                except OSError:
-                    pass
-
+            for key in ["RESDIR", "TIMEDIR", "MAKEXPDIR"]: makedirs(tree[key])
             dirname = os.path.dirname(sys.argv[0])
             script = os.path.basename(sys.argv[0])
             for f in [script, 'browsers.py', 'common.py', 'stats.py', 'tracers.py']:
@@ -173,17 +179,7 @@ class Do(Browser):
             self.logger.error('the topic (directory) %(TOPIC)s doesnot exist.' % tree)
             return
 
-        if options.plot:
-            datename = str(datetime.today())
-            for char in [' ', ':', '-', '.']:
-                datename = datename.replace(char, '_')
-            tree["DATENAME"] = datename
-            tree["GRAPH_DIR"] = "%(TOPIC)s/graph_%(DATENAME)s" % tree
-
-            try:
-                os.makedirs(tree["GRAPH_DIR"])
-            except OSError:
-                pass
+        if options.plot: makedirs(tree["GRAPHDIR"])
 
         self.browseAll(tree)
 
