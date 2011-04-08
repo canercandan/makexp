@@ -51,7 +51,8 @@ class Easy(Tracer):
         if self.xlabel: pylab.xlabel(self.xlabel)
         if self.ylabel: pylab.ylabel(self.ylabel)
 
-        filename = '%(NAME)s_%(MANGLENAME_PATTERN)s.pdf' % tree % tree
+        tree['MANGLENAME'] = options.manglename_pattern % tree
+        filename = '%(NAME)s_%(MANGLENAME)s.pdf' % tree
 
         pylab.savefig('%s/%s_%s' % (tree["GRAPH_DIR"], self.title, filename), format='pdf')
 

@@ -33,8 +33,8 @@ class Fitness(Stat):
         self.pattern = pattern
 
     def callit(self, options, tree):
-        tree['MANGLENAME'] = tree['MANGLENAME_PATTERN'] % tree
-        tree['PLAN_FILENAME'] = tree['PLAN_FILENAME_PATTERN'] % tree
+        tree['MANGLENAME'] = options.manglename_pattern % tree
+        tree['PLAN_FILENAME'] = options.planfilename_pattern % tree
 
         fitnesses = []
 
@@ -74,13 +74,13 @@ class SpeedUp(Stat):
         self.pattern = pattern
 
     def callit(self, options, tree):
-        tree['MANGLENAME'] = tree['MANGLENAME_PATTERN'] % tree
+        tree['MANGLENAME'] = options.manglename_pattern % tree
 
         diffs = []
 
         for num in range(1, options.nruns+1):
             tree['NUM'] = num
-            tree['TIME_FILENAME'] = tree['TIME_FILENAME_PATTERN'] % tree
+            tree['TIME_FILENAME'] = options.timefilename_pattern % tree
 
             data = open(tree['TIME_FILENAME']).readlines()
 

@@ -108,15 +108,40 @@ class Do(Browser):
     Ugly name I know but called like that for historical reasons
     """
 
-    def __init__(self, parser, browser=None, topic=str(datetime.today()), execute=False, plot=False):
+    def __init__(self, parser, browser=None, topic=str(datetime.today()), execute=False, plot=False,
+                 manglename_pattern="%(FIELD)s_%(COMMAND)s_%(SCHEMA)s_S%(POPSIZE)d_C%(CORESIZE)d",
+                 timefilename_pattern="%(TIMEDIR)s/%(NAME)s_%(MANGLENAME)s.time.%(NUM)s",
+                 resfilename_pattern="%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.out.%(NUM)s",
+                 planfilename_pattern="%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.soln.%(NUM)s",
+                 command_pattern=\
+                     "/usr/bin/time -v -o %(TIME_FILENAME)s "\
+                     "timelimit -t %(TIMELIMIT)d "\
+                     "%(BINARYPATH)s/%(COMMAND)s "\
+                     "--seed=%(SEED)d "\
+                     "--domain=%(DOMAIN)s "\
+                     "--instance=%(INSTANCE)s "\
+                     "--plan-file=%(PLAN_FILENAME)s "\
+                     "--runs-max=%(RUNMAX)d "\
+                     "--popSize=%(POPSIZE)d "\
+                     "--gen-steady=%(GENSTEADY)d "\
+                     "--parallelize-loop=%(PARALLELIZE)d "\
+                     "--parallelize-nthreads=%(CORESIZE)d "\
+                     "--parallelize-dynamic=%(SCHEMABOOL)d "\
+                     "> %(RES_FILENAME)s"):
+
         Browser.__init__(self, parser, browser)
 
         for char in [' ', ':', '-', '.']: topic = topic.replace(char, '_')
         parser.add_option('-t', '--topic', default=topic, help='give here a topic name used to create the folder')
 
         parser.add_option('-e', '--execute', action='store_true', default=execute, help='execute experiences')
-
         parser.add_option('-p', '--plot', action='store_true', default=plot, help='plot data')
+
+        parser.add_option('-W', '--manglename_pattern', default=manglename_pattern, help='give here a pattern for mangle name')
+        parser.add_option('-X', '--timefilename_pattern', default=timefilename_pattern, help='give here a pattern for time filename')
+        parser.add_option('-Y', '--resfilename_pattern', default=resfilename_pattern, help='give here a pattern for result filename')
+        parser.add_option('-Z', '--planfilename_pattern', default=planfilename_pattern, help='give here a pattern for plan filename')
+        parser.add_option('-C', '--command_pattern', default=command_pattern, help='give here a pattern for command')
 
     def browse(self, options, tree):
         resdir = "%s/Res" % options.topic
@@ -125,27 +150,6 @@ class Do(Browser):
         tree["TOPIC"] = options.topic
         tree["RESDIR"] = resdir
         tree["TIMEDIR"] = timedir
-
-        tree["MANGLENAME_PATTERN"] = "%(FIELD)s_%(COMMAND)s_%(SCHEMA)s_S%(POPSIZE)d_C%(CORESIZE)d"
-        tree["TIME_FILENAME_PATTERN"] = "%(TIMEDIR)s/%(NAME)s_%(MANGLENAME)s.time.%(NUM)s"
-        tree["RES_FILENAME_PATTERN"] = "%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.out.%(NUM)s"
-        tree["PLAN_FILENAME_PATTERN"] = "%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.soln.%(NUM)s"
-
-        tree["COMMAND_PATTERN"] =\
-            "/usr/bin/time -v -o %(TIME_FILENAME)s "\
-            "timelimit -t %(TIMELIMIT)d "\
-            "%(BINARYPATH)s/%(COMMAND)s "\
-            "--seed=%(SEED)d "\
-            "--domain=%(DOMAIN)s "\
-            "--instance=%(INSTANCE)s "\
-            "--plan-file=%(PLAN_FILENAME)s "\
-            "--runs-max=%(RUNMAX)d "\
-            "--popSize=%(POPSIZE)d "\
-            "--gen-steady=%(GENSTEADY)d "\
-            "--parallelize-loop=%(PARALLELIZE)d "\
-            "--parallelize-nthreads=%(CORESIZE)d "\
-            "--parallelize-dynamic=%(SCHEMABOOL)d "\
-            "> %(RES_FILENAME)s"
 
         # create needed directories
         if options.execute:
@@ -156,6 +160,10 @@ class Do(Browser):
                     os.makedirs(d)
                 except OSError:
                     pass
+
+        if not os.path.isdir(tree["TOPIC"]):
+            self.logger.error('the topic (directory) %(TOPIC)s doesnot exist.' % tree)
+            return
 
         if options.plot:
             datename = str(datetime.today())
@@ -303,10 +311,10 @@ class Execute(Browser):
         parser.add_option('-T', '--timelimit', type='int', default=timelimit, help='with timelimit fixed')
 
     def browse(self, options, tree):
-        tree["MANGLENAME"] = tree["MANGLENAME_PATTERN"] % tree
-        tree["TIME_FILENAME"] = tree["TIME_FILENAME_PATTERN"] % tree
-        tree["RES_FILENAME"] = tree["RES_FILENAME_PATTERN"] % tree
-        tree["PLAN_FILENAME"] = tree["PLAN_FILENAME_PATTERN"] % tree
+        tree["MANGLENAME"] = options.manglename_pattern % tree
+        tree["TIME_FILENAME"] = options.timefilename_pattern % tree
+        tree["RES_FILENAME"] = options.resfilename_pattern % tree
+        tree["PLAN_FILENAME"] = options.planfilename_pattern % tree
 
         if options.runmax:
             tree["RUNMAX"] = options.runmax
@@ -316,7 +324,7 @@ class Execute(Browser):
         tree["TIMELIMIT"] = options.timelimit
         tree["BINARYPATH"] = options.binarypath
 
-        cmd = tree["COMMAND_PATTERN"] % tree
+        cmd = options.command_pattern % tree
 
         self.logger.debug(cmd)
 
