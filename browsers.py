@@ -20,7 +20,7 @@
 Browser classes enable to choose the order of experiences you want to test. Sometimes it is useful to define priorities for each test in order to get faster the results wished. This is mainly the case when you have a long waiting time.
 """
 
-import optparse, logging, sys, os, subprocess
+import optparse, logging, sys, os, subprocess, shutil
 from datetime import datetime
 import common
 
@@ -128,7 +128,7 @@ class Do(Browser):
                      "--parallelize-nthreads=%(CORESIZE)d "\
                      "--parallelize-dynamic=%(SCHEMABOOL)d "\
                      "> %(RES_FILENAME)s",
-                 description="No description"):
+                 description="No description\n"):
 
         Browser.__init__(self, parser, browser)
 
@@ -147,23 +147,27 @@ class Do(Browser):
         parser.add_option('-d', '--description', default=description, help='give here a description of your experience. This is saved in README file')
 
     def browse(self, options, tree):
-        resdir = "%s/Res" % options.topic
-        timedir = "%s/Time" % options.topic
-
         tree["TOPIC"] = options.topic
-        tree["RESDIR"] = resdir
-        tree["TIMEDIR"] = timedir
+
+        tree["RESDIR"] = "%(TOPIC)s/Res" % tree
+        tree["TIMEDIR"] = "%(TOPIC)s/Time" % tree
+        tree["MAKEXPDIR"] = "%(TOPIC)s/makexp" % tree
 
         # create needed directories
         if options.execute:
-            for d in [resdir, timedir]:
+            for key in ["RESDIR", "TIMEDIR", "MAKEXPDIR"]:
                 try:
-                    os.makedirs(d)
+                    os.makedirs(tree[key])
                 except OSError:
                     pass
 
+            dirname = os.path.dirname(sys.argv[0])
+            script = os.path.basename(sys.argv[0])
+            for f in [script, 'browsers.py', 'common.py', 'stats.py', 'tracers.py']:
+                shutil.copy2("%s/%s" % (dirname, f), "%(MAKEXPDIR)s/" % tree)
+
             open('%(TOPIC)s/COMMAND' % tree, 'w').write("%s\n" % ' '.join(sys.argv))
-            open('%(TOPIC)s/README' % tree, 'w').write("%s\n" % options.description)
+            open('%(TOPIC)s/README' % tree, 'w').write(options.description)
 
         if not os.path.isdir(tree["TOPIC"]):
             self.logger.error('the topic (directory) %(TOPIC)s doesnot exist.' % tree)
@@ -173,7 +177,8 @@ class Do(Browser):
             datename = str(datetime.today())
             for char in [' ', ':', '-', '.']:
                 datename = datename.replace(char, '_')
-            tree["GRAPH_DIR"] = "%s/graph_%s" % (tree["TOPIC"], datename)
+            tree["DATENAME"] = datename
+            tree["GRAPH_DIR"] = "%(TOPIC)s/graph_%(DATENAME)s" % tree
 
             try:
                 os.makedirs(tree["GRAPH_DIR"])
