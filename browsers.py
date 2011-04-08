@@ -127,7 +127,8 @@ class Do(Browser):
                      "--parallelize-loop=%(PARALLELIZE)d "\
                      "--parallelize-nthreads=%(CORESIZE)d "\
                      "--parallelize-dynamic=%(SCHEMABOOL)d "\
-                     "> %(RES_FILENAME)s"):
+                     "> %(RES_FILENAME)s",
+                 description="No description"):
 
         Browser.__init__(self, parser, browser)
 
@@ -143,6 +144,8 @@ class Do(Browser):
         parser.add_option('-Z', '--planfilename_pattern', default=planfilename_pattern, help='give here a pattern for plan filename')
         parser.add_option('-C', '--command_pattern', default=command_pattern, help='give here a pattern for command')
 
+        parser.add_option('-d', '--description', default=description, help='give here a description of your experience. This is saved in README file')
+
     def browse(self, options, tree):
         resdir = "%s/Res" % options.topic
         timedir = "%s/Time" % options.topic
@@ -153,13 +156,14 @@ class Do(Browser):
 
         # create needed directories
         if options.execute:
-            open('%(TOPIC)s/COMMAND' % tree, 'w').write("%s\n" % ' '.join(sys.argv))
-
             for d in [resdir, timedir]:
                 try:
                     os.makedirs(d)
                 except OSError:
                     pass
+
+            open('%(TOPIC)s/COMMAND' % tree, 'w').write("%s\n" % ' '.join(sys.argv))
+            open('%(TOPIC)s/README' % tree, 'w').write("%s\n" % options.description)
 
         if not os.path.isdir(tree["TOPIC"]):
             self.logger.error('the topic (directory) %(TOPIC)s doesnot exist.' % tree)
