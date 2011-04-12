@@ -19,8 +19,12 @@
 import common
 
 class Tracer(common.Base):
-    def __init__(self, parser):
+    def __init__(self, parser, title=None, xlabel=None, ylabel=None):
         common.Base.__init__(self, parser)
+
+        self.title = title
+        self.xlabel = xlabel
+        self.ylabel = ylabel
 
         self.values = []
 
@@ -38,23 +42,23 @@ class Tracer(common.Base):
         self.values.append(value)
 
 class Easy(Tracer):
-    def __init__(self, parser, title=None, xlabel=None, ylabel=None):
-        Tracer.__init__(self, parser)
+    def __init__(self, parser, title=None, xlabel=None, ylabel=None, positions=None):
+        Tracer.__init__(self, parser, title, xlabel, ylabel)
 
-        self.title = title if title else 'notitle'
-        self.xlabel = xlabel
-        self.ylabel = ylabel
+        self.positions = positions
 
     def trace(self, options, tree):
         import pylab
-        pylab.boxplot(self.values)
+
+        pylab.boxplot(self.values, positions=self.positions)
+
         if self.xlabel: pylab.xlabel(self.xlabel)
         if self.ylabel: pylab.ylabel(self.ylabel)
 
         tree['MANGLENAME'] = options.manglename_pattern % tree
         filename = '%(NAME)s_%(MANGLENAME)s.pdf' % tree
 
-        pylab.savefig('%s/%s_%s' % (tree["GRAPHDIR"], self.title, filename), format='pdf')
+        pylab.savefig('%s/%s_%s' % (tree["GRAPHDIR"], self.title.replace(' ', '_') if self.title else 'notitle', filename), format='pdf')
 
         pylab.cla()
         pylab.clf()
