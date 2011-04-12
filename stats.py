@@ -42,7 +42,8 @@ class Fitness(Stat):
 
     def callit(self, options, tree):
         tree['MANGLENAME'] = options.manglename_pattern % tree
-        tree['PLAN_FILENAME'] = options.planfilename_pattern % tree
+        #tree['PLAN_FILENAME'] = options.planfilename_pattern % tree
+        tree['PLAN_FILENAME'] = "%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.soln." % tree
 
         fitnesses = []
 
@@ -82,7 +83,8 @@ class FitnessLast(Stat):
 
     def callit(self, options, tree):
         tree['MANGLENAME'] = options.manglename_pattern % tree
-        tree['PLAN_FILENAME'] = options.planfilename_pattern % tree
+        #tree['PLAN_FILENAME'] = options.planfilename_pattern % tree
+        tree['PLAN_FILENAME'] = "%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.soln." % tree
 
         fitnesses = []
 
