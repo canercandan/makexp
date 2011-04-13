@@ -48,17 +48,18 @@ class Easy(Tracer):
         self.positions = positions
 
     def trace(self, options, tree):
-        import pylab
+        import pylab as pl
 
-        pylab.boxplot(self.values, positions=self.positions)
+        fig = pl.figure()
+        ax = fig.add_subplot(111)
 
-        if self.xlabel: pylab.xlabel(self.xlabel)
-        if self.ylabel: pylab.ylabel(self.ylabel)
+        ax.boxplot(self.values)
+
+        if self.positions: ax.set_xticklabels(self.positions)
+        if self.xlabel: ax.set_xlabel(self.xlabel)
+        if self.ylabel: ax.set_ylabel(self.ylabel)
 
         tree['MANGLENAME'] = options.manglename_pattern % tree
         filename = '%(NAME)s_%(MANGLENAME)s.pdf' % tree
 
-        pylab.savefig('%s/%s_%s' % (tree["GRAPHDIR"], self.title.replace(' ', '_') if self.title else 'notitle', filename), format='pdf')
-
-        pylab.cla()
-        pylab.clf()
+        fig.savefig('%s/%s_%s' % (tree["GRAPHDIR"], self.title.replace(' ', '_') if self.title else 'notitle', filename), format='pdf')
