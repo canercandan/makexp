@@ -33,8 +33,8 @@ class Stat(common.Base):
             if not tracer.ylabel:
                 tracer.ylabel = title
 
-class Fitness(Stat):
-    def __init__(self, parser, tracer, idx, pattern, title="Fitness"):
+class AgregatedFitness(Stat):
+    def __init__(self, parser, tracer, idx, pattern, title="Agregated Fitness"):
         Stat.__init__(self, parser, tracer, title)
 
         self.idx = idx
@@ -66,15 +66,15 @@ class Fitness(Stat):
             tree['TITLE'] = self.title.replace(' ', '_')
             open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data' % tree, 'w').write(str(fitnesses))
 
-class MakeSpan(Fitness):
+class AgregatedMakeSpan(AgregatedFitness):
     def __init__(self, parser, tracer):
-        Fitness.__init__(self, parser, tracer, 2, 'Makespan', title='Makespan')
+        AgregatedFitness.__init__(self, parser, tracer, 2, 'Makespan', title='Agregated Makespan')
 
-class TotalCost(Fitness):
+class AgregatedTotalCost(AgregatedFitness):
     def __init__(self, parser, tracer):
-        Fitness.__init__(self, parser, tracer, 3, 'TotalCost', title='Total cost')
+        AgregatedFitness.__init__(self, parser, tracer, 3, 'TotalCost', title='Agregated Total cost')
 
-class FitnessLast(Stat):
+class Fitness(Stat):
     def __init__(self, parser, tracer, idx, pattern, title="Fitness"):
         Stat.__init__(self, parser, tracer, title)
 
@@ -108,17 +108,17 @@ class FitnessLast(Stat):
             tree['TITLE'] = self.title.replace(' ', '_')
             open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data' % tree, 'w').write(str(fitnesses))
 
-class MakeSpanLast(FitnessLast):
+class MakeSpan(Fitness):
     def __init__(self, parser, tracer):
-        FitnessLast.__init__(self, parser, tracer, 2, 'Makespan', title='Makespan Last ones')
+        Fitness.__init__(self, parser, tracer, 2, 'Makespan', title='Makespan')
 
-class TotalCostLast(FitnessLast):
+class TotalCost(Fitness):
     def __init__(self, parser, tracer):
-        FitnessLast.__init__(self, parser, tracer, 3, 'TotalCost', title='Total cost Last ones')
+        Fitness.__init__(self, parser, tracer, 3, 'TotalCost', title='Total cost')
 
 class SpeedUp(Stat):
     def __init__(self, parser, tracer, idx, pattern):
-        Stat.__init__(self, parser, tracer, title="Speed up")
+        Stat.__init__(self, parser, tracer, title="Speedup")
 
         self.idx = idx
         self.pattern = pattern
@@ -181,3 +181,50 @@ class TimeSpeedUp(SpeedUp):
 class TimeEfficiency(Efficiency):
     def __init__(self, parser, tracer, idx=3):
         Efficiency.__init__(self, parser, tracer, idx, 'Percent of CPU this job got')
+
+class ElapsedTime(Stat):
+    def __init__(self, parser, tracer, idx, pattern, title="Elapsed time"):
+        Stat.__init__(self, parser, tracer, title=title)
+
+        self.idx = idx
+        self.pattern = pattern
+
+    def callit(self, options, tree):
+        tree['MANGLENAME'] = options.manglename_pattern % tree
+
+        times = []
+
+        for num in range(1, options.nruns+1):
+            tree['NUM'] = num
+            tree['RES_FILENAME'] = options.resfilename_pattern % tree
+            tree['TIME_FILENAME'] = options.timefilename_pattern % tree
+
+            idx_time = 4
+            data_time = open(tree['TIME_FILENAME']).readlines()
+
+            if len(data_time) <= idx_time: continue
+            if 'Elapsed (wall clock) time' not in data_time[idx_time]: continue
+
+            global_time = data_time[idx_time].split()[-1][:-1].split(':')
+            global_time = float(int(global_time[0]) * 60 + float(global_time[1]))
+
+            data = open(tree['RES_FILENAME']).readlines()
+
+            if len(data) <= self.idx: continue
+            if self.pattern not in data[self.idx]: continue
+
+            time = float(data[self.idx].split()[-1][:-1])
+            times.append(time/global_time)
+
+        if len(times) > 0:
+            self.tracer.add(times)
+            tree['TITLE'] = self.title.replace(' ', '_')
+            open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.time' % tree, 'w').write(str(times))
+
+class EvaluationTime(ElapsedTime):
+    def __init__(self, parser, tracer, idx=20):
+        ElapsedTime.__init__(self, parser, tracer, idx, 'Evaluation elapsed time', title='Evaluation elapsed time')
+
+class VariationTime(ElapsedTime):
+    def __init__(self, parser, tracer, idx=21):
+        ElapsedTime.__init__(self, parser, tracer, idx, 'Variation elapsed time', title='Variation elapsed time')
