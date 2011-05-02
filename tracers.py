@@ -62,4 +62,4 @@ class Easy(Tracer):
         tree['MANGLENAME'] = options.manglename_pattern % tree
         filename = '%(NAME)s_%(MANGLENAME)s.pdf' % tree
 
-        fig.savefig('%s/%s_%s' % (tree["GRAPHDIR"], self.title.replace(' ', '_') if self.title else 'notitle', filename), format='pdf')
+        fig.savefig('%s/%s_%s' % (tree["GRAPHDIR"], self.title.replace(' ', '_') if self.title else 'notitle', filename), format='pdf', dpi=280)
