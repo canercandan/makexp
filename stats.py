@@ -197,6 +197,78 @@ class ElapsedTime(Stat):
         for num in range(1, options.nruns+1):
             tree['NUM'] = num
             tree['RES_FILENAME'] = options.resfilename_pattern % tree
+
+            data = open(tree['RES_FILENAME']).readlines()
+
+            if len(data) <= self.idx: continue
+            if self.pattern not in data[self.idx]: continue
+
+            # idx_global_time = 23
+            # if len(data) <= idx_global_time: continue
+            # if "Elapsed time" not in data[idx_global_time]: continue
+
+            # global_time = float(data[idx_global_time].split()[-1][:-1])
+
+            ### TEMP CODE
+
+            global_time = None
+            idx_global_time = 23
+            if len(data) <= idx_global_time: continue
+            if "Elapsed time" not in data[idx_global_time]:
+
+                tree['TIME_FILENAME'] = options.timefilename_pattern % tree
+
+                idx_time = 4
+                data_time = open(tree['TIME_FILENAME']).readlines()
+
+                if len(data_time) <= idx_time: continue
+                if 'Elapsed (wall clock) time' not in data_time[idx_time]: continue
+
+                global_time = data_time[idx_time].split()[-1][:-1].split(':')
+                global_time = float(int(global_time[0]) * 60 + float(global_time[1]))
+
+            else:
+
+                global_time = float(data[idx_global_time].split()[-1][:-1])
+
+            ### TEMP CODE ENDS
+
+            time = float(data[self.idx].split()[-1][:-1])
+            #times.append(time/global_time)
+            times.append(time)
+
+        if len(times) > 0:
+            self.tracer.add(times)
+            tree['TITLE'] = self.title.replace(' ', '_')
+            open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.time' % tree, 'w').write(str(times))
+
+class EvaluationTime(ElapsedTime):
+    def __init__(self, parser, tracer, idx=20):
+        ElapsedTime.__init__(self, parser, tracer, idx, 'Evaluation elapsed time', title='Evaluation elapsed rate time')
+
+class VariationTime(ElapsedTime):
+    def __init__(self, parser, tracer, idx=21):
+        ElapsedTime.__init__(self, parser, tracer, idx, 'Variation elapsed time', title='Variation elapsed rate time')
+
+class ReplaceTime(ElapsedTime):
+    def __init__(self, parser, tracer, idx=22):
+        ElapsedTime.__init__(self, parser, tracer, idx, 'Replace elapsed time', title='Replace elapsed rate time')
+
+class ElapsedTimeCommand(Stat):
+    def __init__(self, parser, tracer, idx, pattern, title="Elapsed time"):
+        Stat.__init__(self, parser, tracer, title=title)
+
+        self.idx = idx
+        self.pattern = pattern
+
+    def callit(self, options, tree):
+        tree['MANGLENAME'] = options.manglename_pattern % tree
+
+        times = []
+
+        for num in range(1, options.nruns+1):
+            tree['NUM'] = num
+            tree['RES_FILENAME'] = options.resfilename_pattern % tree
             tree['TIME_FILENAME'] = options.timefilename_pattern % tree
 
             idx_time = 4
@@ -221,10 +293,6 @@ class ElapsedTime(Stat):
             tree['TITLE'] = self.title.replace(' ', '_')
             open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.time' % tree, 'w').write(str(times))
 
-class EvaluationTime(ElapsedTime):
-    def __init__(self, parser, tracer, idx=20):
-        ElapsedTime.__init__(self, parser, tracer, idx, 'Evaluation elapsed time', title='Evaluation elapsed time')
-
-class VariationTime(ElapsedTime):
-    def __init__(self, parser, tracer, idx=21):
-        ElapsedTime.__init__(self, parser, tracer, idx, 'Variation elapsed time', title='Variation elapsed time')
+class GlobalTime(ElapsedTimeCommand):
+    def __init__(self, parser, tracer, idx=23):
+        ElapsedTimeCommand.__init__(self, parser, tracer, idx, 'Elapsed time', title='Global elapsed rate time')
