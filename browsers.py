@@ -116,7 +116,7 @@ class Do(Browser):
                  command_pattern=\
                      "/usr/bin/time -v -o %(TIME_FILENAME)s "\
                      "timelimit -t %(TIMELIMIT)d "\
-                     "%(BINARYPATH)s/%(COMMAND)s "\
+                     "%(MAKEXPDIR)s/%(COMMAND)s "\
                      "--seed=%(SEED)d "\
                      "--domain=%(DOMAIN)s "\
                      "--instance=%(INSTANCE)s "\
@@ -289,8 +289,13 @@ class Command(Browser):
         self.commands = commands
 
     def browse(self, options, tree):
+        tree["BINARYPATH"] = options.binarypath
+
         for command in self.commands:
             tree["COMMAND"] = command
+
+            shutil.copy2("%(BINARYPATH)s/%(COMMAND)s" % tree,
+                         "%(MAKEXPDIR)s/" % tree)
 
             self.browseAll(tree)
 
@@ -327,7 +332,6 @@ class Execute(Browser):
         tree["SEED"] = options.seed
         tree["GENSTEADY"] = options.gensteady
         tree["TIMELIMIT"] = options.timelimit
-        tree["BINARYPATH"] = options.binarypath
 
         cmd = options.command_pattern % tree
 
