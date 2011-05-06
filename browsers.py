@@ -294,8 +294,8 @@ class Command(Browser):
         for command in self.commands:
             tree["COMMAND"] = command
 
-            shutil.copy2("%(BINARYPATH)s/%(COMMAND)s" % tree,
-                         "%(MAKEXPDIR)s/" % tree)
+            if options.execute:
+                shutil.copy2("%(BINARYPATH)s/%(COMMAND)s" % tree, "%(MAKEXPDIR)s/" % tree)
 
             self.browseAll(tree)
 
