@@ -60,6 +60,80 @@ class Easy(Tracer):
         if self.ylabel: ax.set_ylabel(self.ylabel)
 
         tree['MANGLENAME'] = options.manglename_pattern % tree
-        filename = '%(NAME)s_%(MANGLENAME)s.pdf' % tree
+        filename = '%(NAME)s_%(MANGLENAME)s.svg' % tree
 
-        fig.savefig('%s/%s_%s' % (tree["GRAPHDIR"], self.title.replace(' ', '_') if self.title else 'notitle', filename), format='pdf', dpi=280)
+        fig.savefig('%s/%s_%s' % (tree["GRAPHDIR"], self.title.replace(' ', '_') if self.title else 'notitle', filename), format='svg', dpi=280)
+
+        # if options.plot_on_window:
+        #     pl.show()
+
+class TimeRatesByOperator(Tracer):
+    def __init__(self, parser, popsizes=None, coresizes=None, binaries=None, samples=None):
+        Tracer.__init__(self, parser)
+
+        self.popsizes = popsizes
+        self.coresizes = coresizes
+        self.binaries = binaries
+        self.samples = samples
+
+        self.ratetimes = [
+            'Evaluation_elapsed_rate_time',
+            'Replace_elapsed_rate_time',
+            'Variation_elapsed_rate_time',
+            ]
+
+        self.properties = [
+            (-0.1, 'green'),
+            (-0.2, 'black'),
+            (0.1, 'red'),
+            (0.2, 'blue'),
+            (0.3, 'gray'),
+            (0, 'orange')]
+
+        self.values = [0]
+
+    def trace(self, options, tree):
+        import pylab as pl
+
+        tree['POPSIZES'] = self.popsizes
+        tree['CORESIZES'] = self.coresizes
+        tree['BINARIES'] = self.binaries
+        tree['SAMPLES'] = self.samples
+
+        fig = pl.figure()
+
+        for tree['CORESIZE'] in tree['CORESIZES']:
+            for tree['BINARY'] in tree['BINARIES']:
+                for k in range(0, len(self.ratetimes)):
+                    tree['RATETIME'] = self.ratetimes[k]
+                    ax = fig.add_subplot(1, len(self.ratetimes), k+1)
+
+                    for i in range(0, len(tree['SAMPLES'])):
+                        pos, color = self.properties[i]
+                        tree['NAME'] = tree['SAMPLES'][i][0]
+
+                        data = []
+
+                        for tree['POPSIZE'] in tree['POPSIZES']:
+                            data.append(eval(open('%(GRAPHDIR)s/%(RATETIME)s_%(NAME)s__%(BINARY)s_S%(POPSIZE)s_C%(CORESIZE)s.time' % tree).readline()))
+
+                        r = ax.boxplot(data, positions=[x-pos for x in range(0,len(data))], widths=0.1)
+
+                        for value in r.values():
+                            pl.setp(value, color=color)
+
+                    ax.set_xticklabels(tree['POPSIZES'])
+                    if k == len(self.ratetimes)-1:
+                        ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], self.properties[i][1]) for i in range(0, len(tree['SAMPLES']))]))
+                    ax.set_title('%(RATETIME)s' % tree)
+                    ax.set_xlabel('# populations')
+                    ax.set_ylabel('Absolute time')
+                    ax.set_ybound(0, 1000)
+
+                tree['MANGLENAME'] = options.manglename_pattern % tree
+                tree['FILENAME'] = '%(MANGLENAME)s.svg' % tree
+
+                fig.savefig('%(GRAPHDIR)s/TimeRatesByOperator_%(FILENAME)s' % tree, format='svg', dpi=280)
+
+        if options.plot_on_window:
+            pl.show()
