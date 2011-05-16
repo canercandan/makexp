@@ -139,6 +139,7 @@ class Do(Browser):
 
         parser.add_option('-e', '--execute', action='store_true', default=execute, help='execute experiences')
         parser.add_option('-p', '--plot', action='store_true', default=plot, help='plot data')
+        parser.add_option('-P', '--plot_on_window', action='store_true', default=False, help='plot data on window instead of file')
 
         parser.add_option('-W', '--manglename_pattern', default=manglename_pattern, help='give here a pattern for mangle name')
         parser.add_option('-X', '--timefilename_pattern', default=timefilename_pattern, help='give here a pattern for time filename')
