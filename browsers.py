@@ -307,7 +307,7 @@ class Range(Browser):
         parser.add_option('-N', '--nruns', type='int', default=nruns, help='give here a number of runs')
 
     def browse(self, options, tree):
-        for num in range(1, options.nruns+1):
+        for num in xrange(1, options.nruns+1):
             tree["NUM"] = num
 
             self.browseAll(tree)

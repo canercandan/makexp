@@ -104,11 +104,11 @@ class TimeRatesByOperator(Tracer):
 
         for tree['CORESIZE'] in tree['CORESIZES']:
             for tree['BINARY'] in tree['BINARIES']:
-                for k in range(0, len(self.ratetimes)):
+                for k in xrange(0, len(self.ratetimes)):
                     tree['RATETIME'] = self.ratetimes[k]
                     ax = fig.add_subplot(1, len(self.ratetimes), k+1)
 
-                    for i in range(0, len(tree['SAMPLES'])):
+                    for i in xrange(0, len(tree['SAMPLES'])):
                         pos, color = self.properties[i]
                         tree['NAME'] = tree['SAMPLES'][i][0]
 
@@ -117,14 +117,14 @@ class TimeRatesByOperator(Tracer):
                         for tree['POPSIZE'] in tree['POPSIZES']:
                             data.append(eval(open('%(GRAPHDIR)s/%(RATETIME)s_%(NAME)s__%(BINARY)s_S%(POPSIZE)s_C%(CORESIZE)s.time' % tree).readline()))
 
-                        r = ax.boxplot(data, positions=[x-pos for x in range(0,len(data))], widths=0.1)
+                        r = ax.boxplot(data, positions=[x-pos for x in xrange(0,len(data))], widths=0.1)
 
                         for value in r.values():
                             pl.setp(value, color=color)
 
                     ax.set_xticklabels(tree['POPSIZES'])
                     if k == len(self.ratetimes)-1:
-                        ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], self.properties[i][1]) for i in range(0, len(tree['SAMPLES']))]))
+                        ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], self.properties[i][1]) for i in xrange(0, len(tree['SAMPLES']))]))
                     ax.set_title('%(RATETIME)s' % tree)
                     ax.set_xlabel('# populations')
                     ax.set_ylabel('Absolute time')
