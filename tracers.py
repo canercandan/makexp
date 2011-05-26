@@ -68,13 +68,14 @@ class Easy(Tracer):
         #     pl.show()
 
 class TimeRatesByOperator(Tracer):
-    def __init__(self, parser, popsizes=None, coresizes=None, binaries=None, samples=None):
+    def __init__(self, parser, popsizes=None, coresizes=None, binaries=None, samples=None, restart=False):
         Tracer.__init__(self, parser)
 
         self.popsizes = popsizes
         self.coresizes = coresizes
         self.binaries = binaries
         self.samples = samples
+        self.restart = restart
 
         self.ratetimes = [
             'Evaluation_elapsed_rate_time',
@@ -99,6 +100,7 @@ class TimeRatesByOperator(Tracer):
         tree['CORESIZES'] = self.coresizes
         tree['BINARIES'] = self.binaries
         tree['SAMPLES'] = self.samples
+        tree['FIELD'] = 'RESTART' if self.restart else ''
 
         fig = pl.figure()
 
@@ -115,7 +117,7 @@ class TimeRatesByOperator(Tracer):
                         data = []
 
                         for tree['POPSIZE'] in tree['POPSIZES']:
-                            data.append(eval(open('%(GRAPHDIR)s/%(RATETIME)s_%(NAME)s__%(BINARY)s_S%(POPSIZE)s_C%(CORESIZE)s.time' % tree).readline()))
+                            data.append(eval(open('%(GRAPHDIR)s/%(RATETIME)s_%(NAME)s_%(FIELD)s_%(BINARY)s_S%(POPSIZE)s_C%(CORESIZE)s.time' % tree).readline()))
 
                         r = ax.boxplot(data, positions=[x-pos for x in xrange(0,len(data))], widths=0.1)
 
