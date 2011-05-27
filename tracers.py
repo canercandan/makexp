@@ -48,6 +48,9 @@ class Easy(Tracer):
         self.positions = positions
 
     def trace(self, options, tree):
+        if options.plot_on_window:
+            return
+
         import pylab as pl
 
         fig = pl.figure()
@@ -64,24 +67,18 @@ class Easy(Tracer):
 
         fig.savefig('%s/%s_%s' % (tree["GRAPHDIR"], self.title.replace(' ', '_') if self.title else 'notitle', filename), format='svg', dpi=280)
 
-        # if options.plot_on_window:
-        #     pl.show()
-
-class TimeRatesByOperator(Tracer):
-    def __init__(self, parser, popsizes=None, coresizes=None, binaries=None, samples=None, restart=False):
+class TimeRates(Tracer):
+    def __init__(self, parser, popsizes=None, coresizes=None, binaries=None, samples=None, ratetimes=[], restart=False, ybound=None, legend=True):
         Tracer.__init__(self, parser)
 
         self.popsizes = popsizes
         self.coresizes = coresizes
         self.binaries = binaries
         self.samples = samples
+        self.ratetimes = ratetimes
         self.restart = restart
-
-        self.ratetimes = [
-            'Evaluation_elapsed_rate_time',
-            'Replace_elapsed_rate_time',
-            'Variation_elapsed_rate_time',
-            ]
+        self.ybound = ybound
+        self.legend = legend
 
         self.properties = [
             (-0.1, 'green'),
@@ -125,17 +122,35 @@ class TimeRatesByOperator(Tracer):
                             pl.setp(value, color=color)
 
                     ax.set_xticklabels(tree['POPSIZES'])
-                    if k == len(self.ratetimes)-1:
-                        ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], self.properties[i][1]) for i in xrange(0, len(tree['SAMPLES']))]))
+
+                    if self.legend:
+                        if k == len(self.ratetimes)-1:
+                            ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], self.properties[i][1]) for i in xrange(0, len(tree['SAMPLES']))]))
+
                     ax.set_title('%(RATETIME)s' % tree)
                     ax.set_xlabel('# populations')
                     ax.set_ylabel('Absolute time')
-                    ax.set_ybound(0, 1000)
+
+                    if self.ybound:
+                        ax.set_ybound(0, self.ybound)
 
                 tree['MANGLENAME'] = options.manglename_pattern % tree
                 tree['FILENAME'] = '%(MANGLENAME)s.svg' % tree
 
-                fig.savefig('%(GRAPHDIR)s/TimeRatesByOperator_%(FILENAME)s' % tree, format='svg', dpi=280)
+                if not options.plot_on_window:
+                    fig.savefig('%(GRAPHDIR)s/TimeRatesByOperator_%(FILENAME)s' % tree, format='svg', dpi=280)
 
         if options.plot_on_window:
             pl.show()
+
+class OperatorsTimeRates(TimeRates):
+    def __init__(self, parser, popsizes=None, coresizes=None, binaries=None, samples=None, restart=False, ybound=None):
+        TimeRates.__init__(self, parser, popsizes, coresizes, binaries, samples, restart=restart, ybound=ybound,
+                           ratetimes=['Evaluation_elapsed_rate_time',
+                                      'Replace_elapsed_rate_time',
+                                      'Variation_elapsed_rate_time']
+                           )
+
+class GlobalTimeRates(TimeRates):
+    def __init__(self, parser, popsizes=None, coresizes=None, binaries=None, samples=None, restart=False, ybound=None):
+        TimeRates.__init__(self, parser, popsizes, coresizes, binaries, samples, restart=restart, ybound=ybound, ratetimes=['Global_elapsed_rate_time'])
