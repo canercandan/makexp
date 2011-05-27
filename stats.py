@@ -183,11 +183,12 @@ class TimeEfficiency(Efficiency):
         Efficiency.__init__(self, parser, tracer, idx, 'Percent of CPU this job got')
 
 class ElapsedTime(Stat):
-    def __init__(self, parser, tracer, idx, pattern, title="Elapsed time"):
+    def __init__(self, parser, tracer, idx, pattern, title="Elapsed time", rate=False):
         Stat.__init__(self, parser, tracer, title=title)
 
         self.idx = idx
         self.pattern = pattern
+        self.rate = rate
 
     def callit(self, options, tree):
         tree['MANGLENAME'] = options.manglename_pattern % tree
@@ -203,39 +204,34 @@ class ElapsedTime(Stat):
             if len(data) <= self.idx: continue
             if self.pattern not in data[self.idx]: continue
 
-            # idx_global_time = 23
-            # if len(data) <= idx_global_time: continue
-            # if "Elapsed time" not in data[idx_global_time]: continue
-
-            # global_time = float(data[idx_global_time].split()[-1][:-1])
-
-            ### TEMP CODE
-
             global_time = None
-            idx_global_time = 23
-            if len(data) <= idx_global_time: continue
-            if "Elapsed time" not in data[idx_global_time]:
 
-                tree['TIME_FILENAME'] = options.timefilename_pattern % tree
+            if self.rate:
+                idx_global_time = 23
+                if len(data) <= idx_global_time: continue
+                if "Elapsed time" not in data[idx_global_time]:
 
-                idx_time = 4
-                data_time = open(tree['TIME_FILENAME']).readlines()
+                    tree['TIME_FILENAME'] = options.timefilename_pattern % tree
 
-                if len(data_time) <= idx_time: continue
-                if 'Elapsed (wall clock) time' not in data_time[idx_time]: continue
+                    idx_time = 4
+                    data_time = open(tree['TIME_FILENAME']).readlines()
 
-                global_time = data_time[idx_time].split()[-1][:-1].split(':')
-                global_time = float(int(global_time[0]) * 60 + float(global_time[1]))
+                    if len(data_time) <= idx_time: continue
+                    if 'Elapsed (wall clock) time' not in data_time[idx_time]: continue
 
-            else:
+                    global_time = data_time[idx_time].split()[-1][:-1].split(':')
+                    global_time = float(int(global_time[0]) * 60 + float(global_time[1]))
 
-                global_time = float(data[idx_global_time].split()[-1][:-1])
+                else:
 
-            ### TEMP CODE ENDS
+                    global_time = float(data[idx_global_time].split()[-1][:-1])
 
             time = float(data[self.idx].split()[-1][:-1])
-            #times.append(time/global_time)
-            times.append(time)
+
+            if self.rate:
+                times.append(time/global_time)
+            else:
+                times.append(time)
 
         if len(times) > 0:
             self.tracer.add(times)
@@ -255,13 +251,20 @@ class ReplaceTime(ElapsedTime):
         ElapsedTime.__init__(self, parser, tracer, idx, 'Replace elapsed time', title='Replace elapsed rate time')
 
 class ElapsedTimeCommand(Stat):
-    def __init__(self, parser, tracer, idx, pattern, title="Elapsed time"):
+    def __init__(self, parser, tracer, idx, pattern, title="Elapsed time", rate=False):
         Stat.__init__(self, parser, tracer, title=title)
 
         self.idx = idx
         self.pattern = pattern
+        self.rate = rate
 
     def callit(self, options, tree):
+        """
+        Construct the list 'times' in browsing N runs, then for each run, it reads there result and time files:
+        - the result file provides the absolute elapsed time measured at runtime
+        - the time file provides the elapsed time (wall clock) got through the command time
+        """
+
         tree['MANGLENAME'] = options.manglename_pattern % tree
 
         times = []
@@ -271,14 +274,17 @@ class ElapsedTimeCommand(Stat):
             tree['RES_FILENAME'] = options.resfilename_pattern % tree
             tree['TIME_FILENAME'] = options.timefilename_pattern % tree
 
-            idx_time = 4
-            data_time = open(tree['TIME_FILENAME']).readlines()
+            global_time = None
 
-            if len(data_time) <= idx_time: continue
-            if 'Elapsed (wall clock) time' not in data_time[idx_time]: continue
+            if self.rate:
+                idx_time = 4
+                data_time = open(tree['TIME_FILENAME']).readlines()
 
-            global_time = data_time[idx_time].split()[-1][:-1].split(':')
-            global_time = float(int(global_time[0]) * 60 + float(global_time[1]))
+                if len(data_time) <= idx_time: continue
+                if 'Elapsed (wall clock) time' not in data_time[idx_time]: continue
+
+                global_time = data_time[idx_time].split()[-1][:-1].split(':')
+                global_time = float(int(global_time[0]) * 60 + float(global_time[1]))
 
             data = open(tree['RES_FILENAME']).readlines()
 
@@ -286,7 +292,11 @@ class ElapsedTimeCommand(Stat):
             if self.pattern not in data[self.idx]: continue
 
             time = float(data[self.idx].split()[-1][:-1])
-            times.append(time/global_time)
+
+            if self.rate:
+                times.append(time/global_time)
+            else:
+                times.append(time)
 
         if len(times) > 0:
             self.tracer.add(times)
