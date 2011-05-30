@@ -67,7 +67,7 @@ class Easy(Tracer):
 
         fig.savefig('%s/%s_%s' % (tree["GRAPHDIR"], self.title.replace(' ', '_') if self.title else 'notitle', filename), format='svg', dpi=280)
 
-class TimeRates(Tracer):
+class AbsoluteTimeProportions(Tracer):
     def __init__(self, parser, popsizes=None, coresizes=None, binaries=None, samples=None, ratetimes=[], restart=False, ybound=None, legend=True):
         Tracer.__init__(self, parser)
 
@@ -143,7 +143,7 @@ class TimeRates(Tracer):
         if options.plot_on_window:
             pl.show()
 
-class OperatorsTimeRates(TimeRates):
+class OperatorsTimeProportions(AbsoluteTimeProportions):
     def __init__(self, parser, popsizes=None, coresizes=None, binaries=None, samples=None, restart=False, ybound=None):
         TimeRates.__init__(self, parser, popsizes, coresizes, binaries, samples, restart=restart, ybound=ybound,
                            ratetimes=['Evaluation_elapsed_rate_time',
@@ -151,6 +151,6 @@ class OperatorsTimeRates(TimeRates):
                                       'Variation_elapsed_rate_time']
                            )
 
-class GlobalTimeRates(TimeRates):
+class GlobalAbsoluteTime(AbsoluteTimeProportions):
     def __init__(self, parser, popsizes=None, coresizes=None, binaries=None, samples=None, restart=False, ybound=None):
         TimeRates.__init__(self, parser, popsizes, coresizes, binaries, samples, restart=restart, ybound=ybound, ratetimes=['Global_elapsed_rate_time'])
