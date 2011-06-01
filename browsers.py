@@ -108,7 +108,7 @@ class Do(Browser):
     Ugly name I know but called like that for historical reasons
     """
 
-    def __init__(self, parser, browser=None, topic=None, execute=False, plot=False,
+    def __init__(self, parser, browser=None, topic=None, other_topic=None, execute=False, plot=False,
                  manglename_pattern="%(FIELD)s_%(COMMAND)s_%(SCHEMA)s_S%(POPSIZE)d_C%(CORESIZE)d",
                  timefilename_pattern="%(TIMEDIR)s/%(NAME)s_%(MANGLENAME)s.time.%(NUM)s",
                  resfilename_pattern="%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.out.%(NUM)s",
@@ -136,6 +136,7 @@ class Do(Browser):
         for char in [' ', ':', '-', '.']: self.datename = self.datename.replace(char, '_')
 
         parser.add_option('-t', '--topic', default=topic if topic else self.datename, help='give here a topic name used to create the folder')
+        parser.add_option('-O', '--other_topic', default=other_topic, help='give here another topic name used to compare with the current one')
 
         parser.add_option('-e', '--execute', action='store_true', default=execute, help='execute experiences')
         parser.add_option('-p', '--plot', action='store_true', default=plot, help='plot data')
@@ -158,12 +159,19 @@ class Do(Browser):
                 pass
 
         tree["TOPIC"] = options.topic
+        tree["OTHER_TOPIC"] = options.other_topic
         tree["DATENAME"] = self.datename
 
         tree["RESDIR"] = "%(TOPIC)s/Res" % tree
         tree["TIMEDIR"] = "%(TOPIC)s/Time" % tree
         tree["MAKEXPDIR"] = "%(TOPIC)s/makexp_%(DATENAME)s" % tree
         tree["GRAPHDIR"] = "%(TOPIC)s/graph_%(DATENAME)s" % tree
+
+        if options.other_topic:
+            tree["OTHER_RESDIR"] = "%(OTHER_TOPIC)s/Res" % tree
+            tree["OTHER_TIMEDIR"] = "%(OTHER_TOPIC)s/Time" % tree
+            tree["OTHER_MAKEXPDIR"] = "%(OTHER_TOPIC)s/makexp_%(DATENAME)s" % tree
+            tree["OTHER_GRAPHDIR"] = "%(OTHER_TOPIC)s/graph_%(DATENAME)s" % tree
 
         # create needed directories
         if options.execute:
