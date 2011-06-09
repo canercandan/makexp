@@ -145,15 +145,15 @@ class AbsoluteTimeProportions(Tracer):
 
 class OperatorsTimeProportions(AbsoluteTimeProportions):
     def __init__(self, parser, popsizes=None, coresizes=None, binaries=None, samples=None, restart=False, ybound=None):
-        TimeRates.__init__(self, parser, popsizes, coresizes, binaries, samples, restart=restart, ybound=ybound,
-                           ratetimes=['Evaluation_elapsed_rate_time',
-                                      'Replace_elapsed_rate_time',
-                                      'Variation_elapsed_rate_time']
-                           )
+        AbsoluteTimeProportions.__init__(self, parser, popsizes, coresizes, binaries, samples, restart=restart, ybound=ybound,
+                                         ratetimes=['Evaluation_elapsed_rate_time',
+                                                    'Replace_elapsed_rate_time',
+                                                    'Variation_elapsed_rate_time']
+                                         )
 
 class GlobalAbsoluteTime(AbsoluteTimeProportions):
     def __init__(self, parser, popsizes=None, coresizes=None, binaries=None, samples=None, restart=False, ybound=None):
-        TimeRates.__init__(self, parser, popsizes, coresizes, binaries, samples, restart=restart, ybound=ybound, ratetimes=['Global_elapsed_rate_time'])
+        AbsoluteTimeProportions.__init__(self, parser, popsizes, coresizes, binaries, samples, restart=restart, ybound=ybound, ratetimes=['Global_elapsed_rate_time'])
 
 class GlobalTimeSpeedup(Tracer):
     def __init__(self, parser, popsizes=None, coresizes=None, binaries=None, samples=None, restart=False, ybound=None, legend=True):
