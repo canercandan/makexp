@@ -151,6 +151,8 @@ class Do(Browser):
         parser.add_option('-d', '--description', default=description, help='give here a description of your experience. This is saved in README file')
 
     def browse(self, options, tree):
+        if options.topic:
+            raise ValueError('option --topic (-t) is missing')
 
         def makedirs(dirname):
             try:
@@ -189,6 +191,121 @@ class Do(Browser):
             return
 
         if options.plot: makedirs(tree["GRAPHDIR"])
+
+        self.browseAll(tree)
+
+class VariablesOnDo(Browser):
+    """
+    Main class to call in passing in argument the parser
+    and a browser class.
+    Ugly name I know but called like that for historical reasons
+    """
+
+    def __init__(self, parser, browser=None, topic=None, other_topic=None):
+        Browser.__init__(self, parser, browser)
+
+        self.datename = str(datetime.today())
+
+        parser.add_option('-t', '--topic', default=topic, help='give here an experience path to use')
+        parser.add_option('-O', '--other_topic', default=other_topic, help='give here another experience path to compare with the current one')
+
+    def browse(self, options, tree):
+        if options.topic:
+            raise ValueError('option --topic (-t) is missing')
+
+        def makedirs(dirname):
+            try:
+                os.makedirs(dirname)
+            except OSError:
+                pass
+
+        def inittree(t):
+            d = {
+                'MANGLENAME_PATTERN': '%(FIELD)s_%(COMMAND)s_%(SCHEMA)s_S%(POPSIZE)d_C%(CORESIZE)d',
+                'TIMEFILENAME_PATTERN': '%(TIMEDIR)s/%(NAME)s_%(MANGLENAME)s.time.%(NUM)s',
+                'RESFILENAME_PATTERN': '%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.out.%(NUM)s',
+                'PLANFILENAME_PATTERN': '%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.soln.%(NUM)s',
+                'COMMAND_PATTERN':\
+                    '/usr/bin/time -v -o %(TIME_FILENAME)s '\
+                    'timelimit -t %(TIMELIMIT)d '\
+                    '%(MAKEXPDIR)s/%(COMMAND)s '\
+                    '--seed=%(SEED)d '\
+                    '--domain=%(DOMAIN)s '\
+                    '--instance=%(INSTANCE)s '\
+                    '--plan-file=%(PLAN_FILENAME)s '\
+                    '--runs-max=%(RUNMAX)d '\
+                    '--popSize=%(POPSIZE)d '\
+                    '--gen-steady=%(GENSTEADY)d '\
+                    '--parallelize-loop=%(PARALLELIZE)d '\
+                    '--parallelize-nthreads=%(CORESIZE)d '\
+                    '--parallelize-dynamic=%(SCHEMABOOL)d '\
+                    '> %(RES_FILENAME)s',
+
+                'RESDIR_PATTERN': '%(TOPIC)s/Res',
+                'TIMEDIR_PATTERN': '%(TOPIC)s/Time',
+                'MAKEXPDIR_PATTERN': '%(TOPIC)s/makexp_%(DATENAME)s',
+                'GRAPHDIR_PATTERN': '%(TOPIC)s/graph_%(DATENAME)s',
+
+                'SAMPLES': [],
+                'NRUNS': 1,
+                'POPSIZES': [],
+                'CORESIZES': [],
+                'BINARIES': [],
+                'BINARYPATH': '.',
+                'RESTART': False,
+                'DYNAMIC': False,
+                'EXECUTE': False,
+                'PLOT': False,
+                'SEED': 0,
+                'RUNMAX': 0,
+                'GENSTEADY': 50,
+                'TIMELIMIT': 1800,
+                }
+            t.update(d)
+
+        def filltree(t):
+            t['RESDIR'] = '%(RESDIR_PATTERN)s' % t % t
+            t['TIMEDIR'] = '%(TIMEDIR_PATTERN)s' % t % t
+            t['MAKEXPDIR'] = '%(MAKEXPDIR_PATTERN)s' % t % t
+            t['GRAPHDIR'] = '%(GRAPHDIR_PATTERN)s' % t % t
+
+        tree["TOPIC"] = options.topic
+        tree['OTHER_TOPIC'] = options.other_topic
+        tree["DATENAME"] = self.datename
+
+        inittree(tree)
+        tree.update(eval(''.join(open('%(TOPIC)s/variables.py' % tree).readlines())))
+        filltree(tree)
+
+        if options.other_topic:
+            tree['OTHER'] = otree = {}
+            otree['TOPIC'] = options.other_topic
+
+            inittree(otree)
+            otree.update(eval(''.join(open('%(TOPIC)s/variables.py' % otree).readlines())))
+            filltree(otree)
+
+            otree['RESDIR'] = '%(RESDIR_PATTERN)s' % otree % otree
+            otree['TIMEDIR'] = '%(TIMEDIR_PATTERN)s' % otree % otree
+            otree['MAKEXPDIR'] = '%(MAKEXPDIR_PATTERN)s' % otree % otree
+            otree['GRAPHDIR'] = '%(GRAPHDIR_PATTERN)s' % otree % otree
+
+        # create needed directories
+        if tree['EXECUTE']:
+            for key in ["RESDIR", "TIMEDIR", "MAKEXPDIR"]: makedirs(tree[key])
+            dirname = os.path.dirname(sys.argv[0])
+            script = os.path.basename(sys.argv[0])
+            for f in [script, 'browsers.py', 'common.py', 'stats.py', 'tracers.py']:
+                shutil.copy2("%s/%s" % (dirname, f), "%(MAKEXPDIR)s/" % tree)
+
+            open('%(TOPIC)s/COMMAND' % tree, 'w').write("%s\n" % ' '.join(sys.argv))
+            open('%(TOPIC)s/README' % tree, 'w').write(options.description)
+
+        if not os.path.isdir(tree['TOPIC']):
+            self.logger.error('the topic (directory) %(TOPIC)s doesnot exist.' % tree)
+            return
+
+        if tree['PLOT']: makedirs(tree['GRAPHDIR'])
 
         self.browseAll(tree)
 
@@ -308,6 +425,19 @@ class Command(Browser):
 
             self.browseAll(tree)
 
+class VariablesOnCommand(Browser):
+    def __init__(self, parser, browser=None):
+        Browser.__init__(self, parser, browser)
+
+    def browse(self, options, tree):
+        for command in tree['BINARIES']:
+            tree["COMMAND"] = command
+
+            if tree['EXECUTE']:
+                shutil.copy2("%(BINARYPATH)s/%(COMMAND)s" % tree, "%(MAKEXPDIR)s/" % tree)
+
+            self.browseAll(tree)
+
 class Range(Browser):
     def __init__(self, parser, browser=None, nruns=1):
         Browser.__init__(self, parser, browser)
@@ -320,7 +450,47 @@ class Range(Browser):
 
             self.browseAll(tree)
 
+class VariablesOnRange(Browser):
+    def __init__(self, parser, browser=None):
+        Browser.__init__(self, parser, browser)
+
+    def browse(self, options, tree):
+        for num in xrange(1, tree['NRUNS']+1):
+            tree["NUM"] = num
+
+            self.browseAll(tree)
+
 class Execute(Browser):
+    def __init__(self, parser, seed=0, runmax=0, gensteady=50, timelimit=1800, stat=None):
+        Browser.__init__(self, parser, stat=stat)
+
+        parser.add_option('-s', '--seed', type='int', default=seed, help='with seed fixed, seed=0 means seed defined randomly')
+        parser.add_option('-M', '--runmax', type='int', default=runmax, help='with runmax fixed, runmax=0 means no limit')
+        parser.add_option('-G', '--gensteady', type='int', default=gensteady, help='with gensteady fixed')
+        parser.add_option('-T', '--timelimit', type='int', default=timelimit, help='with timelimit fixed')
+
+    def browse(self, options, tree):
+        tree["MANGLENAME"] = options.manglename_pattern % tree
+        tree["TIME_FILENAME"] = options.timefilename_pattern % tree
+        tree["RES_FILENAME"] = options.resfilename_pattern % tree
+        tree["PLAN_FILENAME"] = options.planfilename_pattern % tree
+
+        if options.runmax:
+            tree["RUNMAX"] = options.runmax
+
+        tree["SEED"] = options.seed
+        tree["GENSTEADY"] = options.gensteady
+        tree["TIMELIMIT"] = options.timelimit
+
+        cmd = options.command_pattern % tree
+
+        self.logger.debug(cmd)
+
+        if options.execute:
+            p = subprocess.Popen( cmd, shell=True )
+            p.wait()
+
+class VariablesOnExecute(Browser):
     def __init__(self, parser, seed=0, runmax=0, gensteady=50, timelimit=1800, stat=None):
         Browser.__init__(self, parser, stat=stat)
 
