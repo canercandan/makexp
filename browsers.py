@@ -109,26 +109,26 @@ class Do(Browser):
     """
 
     def __init__(self, parser, browser=None, topic=None, other_topic=None, execute=False, plot=False,
-                 manglename_pattern="%(FIELD)s_%(COMMAND)s_%(SCHEMA)s_S%(POPSIZE)d_C%(CORESIZE)d",
-                 timefilename_pattern="%(TIMEDIR)s/%(NAME)s_%(MANGLENAME)s.time.%(NUM)s",
-                 resfilename_pattern="%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.out.%(NUM)s",
-                 planfilename_pattern="%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.soln.%(NUM)s",
+                 manglename_pattern='%(FIELD)s_%(COMMAND)s_%(SCHEMA)s_S%(POPSIZE)d_C%(CORESIZE)d',
+                 timefilename_pattern='%(TIMEDIR)s/%(NAME)s_%(MANGLENAME)s.time.%(NUM)s',
+                 resfilename_pattern='%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.out.%(NUM)s',
+                 planfilename_pattern='%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.soln.%(NUM)s',
                  command_pattern=\
-                     "/usr/bin/time -v -o %(TIME_FILENAME)s "\
-                     "timelimit -t %(TIMELIMIT)d "\
-                     "%(MAKEXPDIR)s/%(COMMAND)s "\
-                     "--seed=%(SEED)d "\
-                     "--domain=%(DOMAIN)s "\
-                     "--instance=%(INSTANCE)s "\
-                     "--plan-file=%(PLAN_FILENAME)s "\
-                     "--runs-max=%(RUNMAX)d "\
-                     "--popSize=%(POPSIZE)d "\
-                     "--gen-steady=%(GENSTEADY)d "\
-                     "--parallelize-loop=%(PARALLELIZE)d "\
-                     "--parallelize-nthreads=%(CORESIZE)d "\
-                     "--parallelize-dynamic=%(SCHEMABOOL)d "\
-                     "> %(RES_FILENAME)s",
-                 description="No description\n"):
+                     '/usr/bin/time -v -o %(TIME_FILENAME)s '\
+                     'timelimit -t %(TIMELIMIT)d '\
+                     '%(MAKEXPDIR)s/%(COMMAND)s '\
+                     '--seed=%(SEED)d '\
+                     '--domain=%(DOMAIN)s '\
+                     '--instance=%(INSTANCE)s '\
+                     '--plan-file=%(PLAN_FILENAME)s '\
+                     '--runs-max=%(RUNMAX)d '\
+                     '--popSize=%(POPSIZE)d '\
+                     '--gen-steady=%(GENSTEADY)d '\
+                     '--parallelize-loop=%(PARALLELIZE)d '\
+                     '--parallelize-nthreads=%(CORESIZE)d '\
+                     '--parallelize-dynamic=%(SCHEMABOOL)d '\
+                     '> %(RES_FILENAME)s',
+                 description='No description\n'):
 
         Browser.__init__(self, parser, browser)
 
@@ -151,7 +151,7 @@ class Do(Browser):
         parser.add_option('-d', '--description', default=description, help='give here a description of your experience. This is saved in README file')
 
     def browse(self, options, tree):
-        if options.topic:
+        if not options.topic:
             raise ValueError('option --topic (-t) is missing')
 
         def makedirs(dirname):
@@ -160,24 +160,24 @@ class Do(Browser):
             except OSError:
                 pass
 
-        tree["TOPIC"] = options.topic
-        tree["OTHER_TOPIC"] = options.other_topic
-        tree["DATENAME"] = self.datename
+        tree['TOPIC'] = options.topic
+        tree['OTHER_TOPIC'] = options.other_topic
+        tree['DATENAME'] = self.datename
 
-        tree["RESDIR"] = "%(TOPIC)s/Res" % tree
-        tree["TIMEDIR"] = "%(TOPIC)s/Time" % tree
-        tree["MAKEXPDIR"] = "%(TOPIC)s/makexp_%(DATENAME)s" % tree
-        tree["GRAPHDIR"] = "%(TOPIC)s/graph_%(DATENAME)s" % tree
+        tree['RESDIR'] = '%(TOPIC)s/Res' % tree
+        tree['TIMEDIR'] = '%(TOPIC)s/Time' % tree
+        tree['MAKEXPDIR'] = '%(TOPIC)s/makexp_%(DATENAME)s' % tree
+        tree['GRAPHDIR'] = '%(TOPIC)s/graph_%(DATENAME)s' % tree
 
         if options.other_topic:
-            tree["OTHER_RESDIR"] = "%(OTHER_TOPIC)s/Res" % tree
-            tree["OTHER_TIMEDIR"] = "%(OTHER_TOPIC)s/Time" % tree
-            tree["OTHER_MAKEXPDIR"] = "%(OTHER_TOPIC)s/makexp_%(DATENAME)s" % tree
-            tree["OTHER_GRAPHDIR"] = "%(OTHER_TOPIC)s/graph_%(DATENAME)s" % tree
+            tree['OTHER_RESDIR'] = '%(OTHER_TOPIC)s/Res' % tree
+            tree['OTHER_TIMEDIR'] = '%(OTHER_TOPIC)s/Time' % tree
+            tree['OTHER_MAKEXPDIR'] = '%(OTHER_TOPIC)s/makexp_%(DATENAME)s' % tree
+            tree['OTHER_GRAPHDIR'] = '%(OTHER_TOPIC)s/graph_%(DATENAME)s' % tree
 
         # create needed directories
         if options.execute:
-            for key in ["RESDIR", "TIMEDIR", "MAKEXPDIR"]: makedirs(tree[key])
+            for key in ['RESDIR', 'TIMEDIR', 'MAKEXPDIR']: makedirs(tree[key])
             dirname = os.path.dirname(sys.argv[0])
             script = os.path.basename(sys.argv[0])
             for f in [script, 'browsers.py', 'common.py', 'stats.py', 'tracers.py']:
@@ -186,7 +186,7 @@ class Do(Browser):
             open('%(TOPIC)s/COMMAND' % tree, 'w').write("%s\n" % ' '.join(sys.argv))
             open('%(TOPIC)s/README' % tree, 'w').write(options.description)
 
-        if not os.path.isdir(tree["TOPIC"]):
+        if not os.path.isdir(tree['TOPIC']):
             self.logger.error('the topic (directory) %(TOPIC)s doesnot exist.' % tree)
             return
 
@@ -205,12 +205,13 @@ class VariablesOnDo(Browser):
         Browser.__init__(self, parser, browser)
 
         self.datename = str(datetime.today())
+        for char in [' ', ':', '-', '.']: self.datename = self.datename.replace(char, '_')
 
         parser.add_option('-t', '--topic', default=topic, help='give here an experience path to use')
         parser.add_option('-O', '--other_topic', default=other_topic, help='give here another experience path to compare with the current one')
 
     def browse(self, options, tree):
-        if options.topic:
+        if not options.topic:
             raise ValueError('option --topic (-t) is missing')
 
         def makedirs(dirname):
@@ -256,10 +257,31 @@ class VariablesOnDo(Browser):
                 'DYNAMIC': False,
                 'EXECUTE': False,
                 'PLOT': False,
+                'PLOT_ON_WINDOW': False,
+                'PARALLELIZE': True,
                 'SEED': 0,
                 'RUNMAX': 0,
                 'GENSTEADY': 50,
                 'TIMELIMIT': 1800,
+
+                'TITLE': None,
+                'XLABEL': None,
+                'YLABEL': None,
+                'POSITIONS': None,
+                'XBOUND': None,
+                'YBOUND': None,
+                'LEGEND': True,
+                'PROPERTIES': [],
+
+                'SPEEDUP_IDX': 3,
+                'EFFICIENCY_IDX': 3,
+                'MAKESPAN_IDX': 2,
+                'TOTALCOST_IDX': 3,
+                'EVALUATION_TIME_IDX': 20,
+                'VARIATION_TIME_IDX': 21,
+                'REPLACE_TIME_IDX': 22,
+                'GLOBAL_TIME_IDX': 23,
+                'TIME_IDX': 4,
                 }
             t.update(d)
 
@@ -269,9 +291,9 @@ class VariablesOnDo(Browser):
             t['MAKEXPDIR'] = '%(MAKEXPDIR_PATTERN)s' % t % t
             t['GRAPHDIR'] = '%(GRAPHDIR_PATTERN)s' % t % t
 
-        tree["TOPIC"] = options.topic
+        tree['TOPIC'] = options.topic
         tree['OTHER_TOPIC'] = options.other_topic
-        tree["DATENAME"] = self.datename
+        tree['DATENAME'] = self.datename
 
         inittree(tree)
         tree.update(eval(''.join(open('%(TOPIC)s/variables.py' % tree).readlines())))
@@ -280,6 +302,7 @@ class VariablesOnDo(Browser):
         if options.other_topic:
             tree['OTHER'] = otree = {}
             otree['TOPIC'] = options.other_topic
+            otree['DATENAME'] = self.datename
 
             inittree(otree)
             otree.update(eval(''.join(open('%(TOPIC)s/variables.py' % otree).readlines())))
@@ -292,7 +315,7 @@ class VariablesOnDo(Browser):
 
         # create needed directories
         if tree['EXECUTE']:
-            for key in ["RESDIR", "TIMEDIR", "MAKEXPDIR"]: makedirs(tree[key])
+            for key in ['RESDIR', 'TIMEDIR', 'MAKEXPDIR']: makedirs(tree[key])
             dirname = os.path.dirname(sys.argv[0])
             script = os.path.basename(sys.argv[0])
             for f in [script, 'browsers.py', 'common.py', 'stats.py', 'tracers.py']:
@@ -316,9 +339,21 @@ class Sample(Browser):
 
     def browse(self, options, tree):
         for name, domain, instance in self.samples:
-            tree["NAME"] = name
-            tree["DOMAIN"] = domain
-            tree["INSTANCE"] = instance
+            tree['NAME'] = name
+            tree['DOMAIN'] = domain
+            tree['INSTANCE'] = instance
+
+            self.browseAll(tree)
+
+class VariablesOnSample(Browser):
+    def __init__(self, parser, browser=None):
+        Browser.__init__(self, parser, browser)
+
+    def browse(self, options, tree):
+        for name, domain, instance in tree['SAMPLES']:
+            tree['NAME'] = name
+            tree['DOMAIN'] = domain
+            tree['INSTANCE'] = instance
 
             self.browseAll(tree)
 
@@ -330,7 +365,17 @@ class Pop(Browser):
     def browse(self, options, tree):
         tree['POPSIZES'] = self.popsizes
         for size in self.popsizes:
-            tree["POPSIZE"] = size
+            tree['POPSIZE'] = size
+
+            self.browseAll(tree)
+
+class VariablesOnPop(Browser):
+    def __init__(self, parser, browser=None):
+        Browser.__init__(self, parser, browser)
+
+    def browse(self, options, tree):
+        for size in tree['POPSIZES']:
+            tree['POPSIZE'] = size
 
             self.browseAll(tree)
 
@@ -345,8 +390,18 @@ class Core(Browser):
     def browse(self, options, tree):
         tree['CORESIZES'] = self.coresizes
         for size in self.coresizes:
-            tree["CORESIZE"] = size
-            tree["PARALLELIZE"] = options.parallelize
+            tree['CORESIZE'] = size
+            tree['PARALLELIZE'] = options.parallelize
+
+            self.browseAll(tree)
+
+class VariablesOnCore(Browser):
+    def __init__(self, parser, browser=None):
+        Browser.__init__(self, parser, browser)
+
+    def browse(self, options, tree):
+        for size in tree['CORESIZES']:
+            tree['CORESIZE'] = size
 
             self.browseAll(tree)
 
@@ -355,8 +410,18 @@ class Sequential(Browser):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
-        tree["CORESIZE"] = 1
-        tree["PARALLELIZE"] = False
+        tree['CORESIZE'] = 1
+        tree['PARALLELIZE'] = False
+
+        self.browseAll(tree)
+
+class VariablesOnSequential(Browser):
+    def __init__(self, parser, browser=None):
+        Browser.__init__(self, parser, browser)
+
+    def browse(self, options, tree):
+        tree['CORESIZE'] = 1
+        tree['PARALLELIZE'] = False
 
         self.browseAll(tree)
 
@@ -367,8 +432,18 @@ class Restart(Browser):
         parser.add_option('-R', '--restart', action='store_true', default=restart, help='with restarts')
 
     def browse(self, options, tree):
-        tree["FIELD"] = "RESTART" if options.restart else ""
-        tree["RUNMAX"] = 0 if options.restart else 1
+        tree['FIELD'] = 'RESTART' if options.restart else ''
+        tree['RUNMAX'] = 0 if options.restart else 1
+
+        self.browseAll(tree)
+
+class VariablesOnRestart(Browser):
+    def __init__(self, parser, browser=None):
+        Browser.__init__(self, parser, browser)
+
+    def browse(self, options, tree):
+        tree['FIELD'] = 'RESTART' if tree['RESTART'] else ''
+        tree['RUNMAX'] = 0 if tree['RESTART'] else 1
 
         self.browseAll(tree)
 
@@ -377,9 +452,20 @@ class Starting(Browser):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
-        for field in ["", "RESTART"]:
-            tree["FIELD"] = field
-            tree["RUNMAX"] = 0 if field == "RESTART" else 1
+        for field in ['', 'RESTART']:
+            tree['FIELD'] = field
+            tree['RUNMAX'] = 0 if field == 'RESTART' else 1
+
+            self.browseAll(tree)
+
+class VariablesOnStarting(Browser):
+    def __init__(self, parser, browser=None):
+        Browser.__init__(self, parser, browser)
+
+    def browse(self, options, tree):
+        for field in ['', 'RESTART']:
+            tree['FIELD'] = field
+            tree['RUNMAX'] = 0 if field == 'RESTART' else 1
 
             self.browseAll(tree)
 
@@ -390,8 +476,18 @@ class Dynamic(Browser):
         parser.add_option('-D', '--dynamic', action='store_true', default=dynamic, help='use the dynamic scheduler in openmp')
 
     def browse(self, options, tree):
-        tree["SCHEMA"] = "DYNAMIC" if options.dynamic else "STATIC"
-        tree["SCHEMABOOL"] = options.dynamic
+        tree['SCHEMA'] = 'DYNAMIC' if options.dynamic else 'STATIC'
+        tree['SCHEMABOOL'] = options.dynamic
+
+        self.browseAll(tree)
+
+class VariablesOnDynamic(Browser):
+    def __init__(self, parser, browser=None):
+        Browser.__init__(self, parser, browser)
+
+    def browse(self, options, tree):
+        tree['SCHEMA'] = 'DYNAMIC' if tree['DYNAMIC'] else 'STATIC'
+        tree['SCHEMABOOL'] = tree['DYNAMIC']
 
         self.browseAll(tree)
 
@@ -400,9 +496,20 @@ class Schema(Browser):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
-        for schema in ["STATIC", "DYNAMIC"]:
-            tree["SCHEMA"] = schema
-            tree["SCHEMABOOL"] = 1 if schema == "DYNAMIC" else 0
+        for schema in ['STATIC', 'DYNAMIC']:
+            tree['SCHEMA'] = schema
+            tree['SCHEMABOOL'] = 1 if schema == 'DYNAMIC' else 0
+
+            self.browseAll(tree)
+
+class VariablesOnSchema(Browser):
+    def __init__(self, parser, browser=None):
+        Browser.__init__(self, parser, browser)
+
+    def browse(self, options, tree):
+        for schema in ['STATIC', 'DYNAMIC']:
+            tree['SCHEMA'] = schema
+            tree['SCHEMABOOL'] = 1 if schema == 'DYNAMIC' else 0
 
             self.browseAll(tree)
 
@@ -415,13 +522,13 @@ class Command(Browser):
         self.commands = commands
 
     def browse(self, options, tree):
-        tree["BINARYPATH"] = options.binarypath
+        tree['BINARYPATH'] = options.binarypath
 
         for command in self.commands:
-            tree["COMMAND"] = command
+            tree['COMMAND'] = command
 
             if options.execute:
-                shutil.copy2("%(BINARYPATH)s/%(COMMAND)s" % tree, "%(MAKEXPDIR)s/" % tree)
+                shutil.copy2('%(BINARYPATH)s/%(COMMAND)s' % tree, '%(MAKEXPDIR)s/' % tree)
 
             self.browseAll(tree)
 
@@ -431,10 +538,10 @@ class VariablesOnCommand(Browser):
 
     def browse(self, options, tree):
         for command in tree['BINARIES']:
-            tree["COMMAND"] = command
+            tree['COMMAND'] = command
 
             if tree['EXECUTE']:
-                shutil.copy2("%(BINARYPATH)s/%(COMMAND)s" % tree, "%(MAKEXPDIR)s/" % tree)
+                shutil.copy2('%(BINARYPATH)s/%(COMMAND)s' % tree, '%(MAKEXPDIR)s/' % tree)
 
             self.browseAll(tree)
 
@@ -456,7 +563,7 @@ class VariablesOnRange(Browser):
 
     def browse(self, options, tree):
         for num in xrange(1, tree['NRUNS']+1):
-            tree["NUM"] = num
+            tree['NUM'] = num
 
             self.browseAll(tree)
 
@@ -470,17 +577,17 @@ class Execute(Browser):
         parser.add_option('-T', '--timelimit', type='int', default=timelimit, help='with timelimit fixed')
 
     def browse(self, options, tree):
-        tree["MANGLENAME"] = options.manglename_pattern % tree
-        tree["TIME_FILENAME"] = options.timefilename_pattern % tree
-        tree["RES_FILENAME"] = options.resfilename_pattern % tree
-        tree["PLAN_FILENAME"] = options.planfilename_pattern % tree
+        tree['MANGLENAME'] = options.manglename_pattern % tree
+        tree['TIME_FILENAME'] = options.timefilename_pattern % tree
+        tree['RES_FILENAME'] = options.resfilename_pattern % tree
+        tree['PLAN_FILENAME'] = options.planfilename_pattern % tree
 
         if options.runmax:
-            tree["RUNMAX"] = options.runmax
+            tree['RUNMAX'] = options.runmax
 
-        tree["SEED"] = options.seed
-        tree["GENSTEADY"] = options.gensteady
-        tree["TIMELIMIT"] = options.timelimit
+        tree['SEED'] = options.seed
+        tree['GENSTEADY'] = options.gensteady
+        tree['TIMELIMIT'] = options.timelimit
 
         cmd = options.command_pattern % tree
 
@@ -491,32 +598,20 @@ class Execute(Browser):
             p.wait()
 
 class VariablesOnExecute(Browser):
-    def __init__(self, parser, seed=0, runmax=0, gensteady=50, timelimit=1800, stat=None):
+    def __init__(self, parser, stat=None):
         Browser.__init__(self, parser, stat=stat)
 
-        parser.add_option('-s', '--seed', type='int', default=seed, help='with seed fixed, seed=0 means seed defined randomly')
-        parser.add_option('-M', '--runmax', type='int', default=runmax, help='with runmax fixed, runmax=0 means no limit')
-        parser.add_option('-G', '--gensteady', type='int', default=gensteady, help='with gensteady fixed')
-        parser.add_option('-T', '--timelimit', type='int', default=timelimit, help='with timelimit fixed')
-
     def browse(self, options, tree):
-        tree["MANGLENAME"] = options.manglename_pattern % tree
-        tree["TIME_FILENAME"] = options.timefilename_pattern % tree
-        tree["RES_FILENAME"] = options.resfilename_pattern % tree
-        tree["PLAN_FILENAME"] = options.planfilename_pattern % tree
+        tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
+        tree['TIME_FILENAME'] = '%(TIMEFILENAME_PATTERN)s' % tree % tree
+        tree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % tree % tree
+        tree['PLAN_FILENAME'] = '%(PLANFILENAME_PATTERN)s' % tree % tree
 
-        if options.runmax:
-            tree["RUNMAX"] = options.runmax
-
-        tree["SEED"] = options.seed
-        tree["GENSTEADY"] = options.gensteady
-        tree["TIMELIMIT"] = options.timelimit
-
-        cmd = options.command_pattern % tree
+        cmd = '%(COMMAND_PATTERN)s' % tree % tree
 
         self.logger.debug(cmd)
 
-        if options.execute:
+        if tree['EXECUTE']:
             p = subprocess.Popen( cmd, shell=True )
             p.wait()
 
