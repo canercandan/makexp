@@ -537,9 +537,7 @@ class VariablesOnCommand(Browser):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
-        for command in tree['BINARIES']:
-            tree['COMMAND'] = command
-
+        for tree['COMMAND'] in tree['BINARIES']:
             if tree['EXECUTE']:
                 shutil.copy2('%(BINARYPATH)s/%(COMMAND)s' % tree, '%(MAKEXPDIR)s/' % tree)
 

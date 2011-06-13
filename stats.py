@@ -557,8 +557,7 @@ class VariablesOnElapsedTimeCommand(VariablesOnStat):
         idx = tree[self.idx_name]
         times = []
 
-        for num in xrange(1, tree['NRUNS']+1):
-            tree['NUM'] = num
+        for tree['NUM'] in xrange(1, tree['NRUNS']+1):
             tree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % tree % tree
             tree['TIME_FILENAME'] = '%(TIMEFILENAME_PATTERN)s' % tree % tree
 

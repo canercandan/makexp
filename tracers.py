@@ -33,9 +33,6 @@ class Tracer(common.Base):
         self.values = []
 
     def callit(self, options, tree):
-        if 'OTHER_TOPIC' not in tree: return
-        # if not then it's the current experience
-
         if not options.plot: return
         if len(self.values) <= 0: return
 
@@ -298,17 +295,20 @@ class VariablesOnGlobalTimeSpeedup(VariablesOnTracer):
         self.ratetimes = ['Global_elapsed_rate_time']
         self.values = [0]
 
+        self.rate = False
+        self.pattern = 'Elapsed time'
+
     def trace(self, options, tree):
         if not options.other_topic:
             raise ValueError('option --other_topic (-O) is missing')
 
         otree = tree['OTHER']
 
-        print otree
-
         import pylab as pl
 
-        tree['FIELD'] = otree['FIELD'] = 'RESTART' if tree['RESTART'] else ''
+        tree['FIELD'] = 'RESTART' if tree['RESTART'] else ''
+        otree['FIELD'] = 'RESTART' if otree['RESTART'] else ''
+
         tree['SCHEMA'] = 'DYNAMIC' if tree['DYNAMIC'] else 'STATIC'
         otree['SCHEMA'] = 'DYNAMIC' if otree['DYNAMIC'] else 'STATIC'
 
@@ -317,8 +317,8 @@ class VariablesOnGlobalTimeSpeedup(VariablesOnTracer):
         for tree['CORESIZE'] in tree['CORESIZES']:
             otree['CORESIZE'] = tree['CORESIZE']
 
-            for tree['BINARY'] in tree['BINARIES']:
-                otree['BINARY'] = tree['BINARY']
+            for tree['COMMAND'] in tree['BINARIES']:
+                otree['COMMAND'] = tree['COMMAND']
 
                 for k in xrange(len(self.ratetimes)):
                     tree['RATETIME'] = otree['RATETIME'] = self.ratetimes[k]
@@ -333,19 +333,64 @@ class VariablesOnGlobalTimeSpeedup(VariablesOnTracer):
                         for tree['POPSIZE'] in tree['POPSIZES']:
                             otree['POPSIZE'] = tree['POPSIZE']
 
-                            print '%(GRAPHDIR)s/%(RATETIME)s_%(NAME)s_%(FIELD)s_%(BINARY)s_%(SCHEMA)s_S%(POPSIZE)s_C%(CORESIZE)s.time' % tree
+                            tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
+                            otree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % otree % otree
 
-                            times = eval(open('%(GRAPHDIR)s/%(RATETIME)s_%(NAME)s_%(FIELD)s_%(BINARY)s_%(SCHEMA)s_S%(POPSIZE)s_C%(CORESIZE)s.time' % tree).readline())
+                            idx = tree['GLOBAL_TIME_IDX']
+                            times = []
+                            otimes = []
 
-                            print '%(GRAPHDIR)s/%(RATETIME)s_%(NAME)s_%(FIELD)s_%(BINARY)s_%(SCHEMA)s_S%(POPSIZE)s_C%(CORESIZE)s.time' % otree
+                            for tree['NUM'] in xrange(1, tree['NRUNS']+1):
+                                otree['NUM'] = tree['NUM']
 
-                            other_times = eval(open('%(GRAPHDIR)s/%(RATETIME)s_%(NAME)s_%(FIELD)s_%(BINARY)s_%(SCHEMA)s_S%(POPSIZE)s_C%(CORESIZE)s.time' % otree).readline())
+                                tree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % tree % tree
+                                otree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % otree % otree
 
-                            for i in xrange(len(times)): other_times[i] = float(other_times[i]) / float(times[i])
+                                tree['TIME_FILENAME'] = '%(TIMEFILENAME_PATTERN)s' % tree % tree
+                                otree['TIME_FILENAME'] = '%(TIMEFILENAME_PATTERN)s' % otree % otree
 
-                            print other_times
+                                global_time = None
+                                oglobal_time = None
 
-                            data.append(other_times)
+                                if self.rate:
+                                    idx_time = tree['TIME_IDX']
+                                    data_time = open(tree['TIME_FILENAME']).readlines()
+                                    if len(data_time) <= idx_time: continue
+                                    if 'Elapsed (wall clock) time' not in data_time[idx_time]: continue
+
+                                    odata_time = open(otree['TIME_FILENAME']).readlines()
+                                    if len(odata_time) <= idx_time: continue
+                                    if 'Elapsed (wall clock) time' not in odata_time[idx_time]: continue
+
+                                    global_time = data_time[idx_time].split()[-1][:-1].split(':')
+                                    global_time = float(int(global_time[0]) * 60 + float(global_time[1]))
+
+                                    oglobal_time = data_time[idx_time].split()[-1][:-1].split(':')
+                                    oglobal_time = float(int(oglobal_time[0]) * 60 + float(oglobal_time[1]))
+
+
+                                local_data = open(tree['RES_FILENAME']).readlines()
+                                olocal_data = open(otree['RES_FILENAME']).readlines()
+
+                                if len(local_data) <= idx: continue
+                                if self.pattern not in local_data[idx]: continue
+
+                                if len(olocal_data) <= idx: continue
+                                if self.pattern not in olocal_data[idx]: continue
+
+                                time = float(local_data[idx].split()[-1][:-1])
+                                otime = float(olocal_data[idx].split()[-1][:-1])
+
+                                if self.rate:
+                                    times.append(time/global_time)
+                                    otimes.append(otime/oglobal_time)
+                                else:
+                                    times.append(time)
+                                    otimes.append(otime)
+
+                            for i in xrange(len(times)): otimes[i] /= times[i]
+
+                            data.append(otimes)
 
                         r = ax.boxplot(data, positions=[x-pos for x in xrange(len(data))], widths=0.1)
 

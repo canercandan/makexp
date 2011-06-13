@@ -106,7 +106,5 @@ class Base:
     def __call__(self, tree = AutoFillingDict()):
         self.logger.debug('begins')
         options, args = self.parser.parse_args()
-        t = tree.copy()
-        if options.topic: self.callit(options, t)
-        #if options.other_topic: self.callit(options, t['OTHER'])
+        if options.topic: self.callit(options, tree.copy())
         self.logger.debug('ends')
