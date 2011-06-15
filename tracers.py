@@ -73,8 +73,7 @@ class Easy(Tracer):
         self.positions = positions
 
     def trace(self, options, tree):
-        if options.plot_on_window:
-            return
+        if options.plot_on_window: return
 
         import pylab as pl
 
@@ -101,8 +100,7 @@ class VariablesOnEasy(VariablesOnTracer):
         VariablesOnTracer.__init__(self, parser)
 
     def trace(self, options, tree):
-        if tree['PLOT_ON_WINDOW']:
-            return
+        if tree['PLOT_ON_WINDOW']: return
 
         import pylab as pl
 
