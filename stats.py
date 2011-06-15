@@ -81,12 +81,16 @@ class VariablesOnAgregatedFitness(VariablesOnStat):
         self.title = title
 
     def callit(self, options, tree):
+        print 'callit'
+
         tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
-        #tree['PLAN_FILENAME'] = '%(PLANFILENAME_PATTERN)s' % tree % tree
-        tree['PLAN_FILENAME'] = "%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.soln." % tree
+        tree['PLAN_FILENAME'] = '%(PLANFILENAME_PATTERN)s' % tree % tree
+        #tree['PLAN_FILENAME'] = "%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.soln." % tree
 
         idx = tree[self.idx_name]
         fitnesses = []
+
+        print idx
 
         dirs = listdir(tree['RESDIR'])
         dirs.sort()

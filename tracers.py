@@ -53,11 +53,8 @@ class VariablesOnTracer(common.Base):
         self.values = []
 
     def callit(self, options, tree):
-        if not tree['PLOT']:
-            return
-
-        if len(self.values) <= 0:
-            return
+        if not tree['PLOT']: return
+        if len(self.values) <= 0: return
 
         self.trace(options, tree)
         del self.values[:]
