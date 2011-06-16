@@ -322,7 +322,7 @@ class VariablesOnDo(Browser):
                 shutil.copy2("%s/%s" % (dirname, f), "%(MAKEXPDIR)s/" % tree)
 
             open('%(TOPIC)s/COMMAND' % tree, 'w').write("%s\n" % ' '.join(sys.argv))
-            open('%(TOPIC)s/README' % tree, 'w').write(options.description)
+            open('%(TOPIC)s/README' % tree, 'w').write(tree['DESCRIPTION'])
 
         if not os.path.isdir(tree['TOPIC']):
             self.logger.error('the topic (directory) %(TOPIC)s doesnot exist.' % tree)
