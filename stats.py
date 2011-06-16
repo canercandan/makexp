@@ -48,8 +48,8 @@ class AgregatedFitness(Stat):
 
     def callit(self, options, tree):
         tree['MANGLENAME'] = options.manglename_pattern % tree
-        #tree['PLAN_FILENAME'] = options.planfilename_pattern % tree
-        tree['PLAN_FILENAME'] = "%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.soln." % tree
+        tree['NUM'] = ''
+        tree['PLAN_FILENAME'] = options.planfilename_pattern % tree
 
         fitnesses = []
 
@@ -82,8 +82,8 @@ class VariablesOnAgregatedFitness(VariablesOnStat):
 
     def callit(self, options, tree):
         tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
+        tree['NUM'] = ''
         tree['PLAN_FILENAME'] = '%(PLANFILENAME_PATTERN)s' % tree % tree
-        #tree['PLAN_FILENAME'] = "%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.soln." % tree
 
         idx = tree[self.idx_name]
         fitnesses = []
@@ -132,8 +132,8 @@ class Fitness(Stat):
 
     def callit(self, options, tree):
         tree['MANGLENAME'] = options.manglename_pattern % tree
-        #tree['PLAN_FILENAME'] = options.planfilename_pattern % tree
-        tree['PLAN_FILENAME'] = "%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.soln." % tree
+        tree['NUM'] = ''
+        tree['PLAN_FILENAME'] = options.planfilename_pattern % tree
 
         fitnesses = []
 
@@ -167,26 +167,25 @@ class VariablesOnFitness(VariablesOnStat):
 
     def callit(self, options, tree):
         tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
-        #tree['PLAN_FILENAME'] = '%(PLANFILENAME_PATTERN)s' % tree % tree
-        tree['PLAN_FILENAME'] = "%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.soln." % tree
+        tree['NUM'] = ''
+        tree['PLAN_FILENAME'] = '%(PLANFILENAME_PATTERN)s' % tree % tree
 
-        idx = tree[self.idx_name]
         fitnesses = []
+        idx = tree[self.idx_name]
 
         dirs = listdir(tree['RESDIR'])
         dirs.sort()
-        for f in dirs:
-            f = '%s/%s' % (tree['RESDIR'], f)
+        for tree['FILENAME'] in dirs:
+            f = '%(RESDIR)s/%(FILENAME)s' % tree
 
-            if tree['PLAN_FILENAME'] in f:
-                if '.last' in f:
-                    data = open(f).readlines()
+            if tree['PLAN_FILENAME'] in f and '.last' in f:
+                data = open(f).readlines()
 
-                    if len(data) <= idx: continue
-                    if self.pattern not in data[idx]: continue
+                if len(data) <= idx: continue
+                if self.pattern not in data[idx]: continue
 
-                    fitness = int(data[idx].split()[-1])
-                    fitnesses.append(fitness)
+                fitness = int(data[idx].split()[-1])
+                fitnesses.append(fitness)
 
         if len(fitnesses) > 0:
             self.tracer.add(fitnesses)
@@ -195,19 +194,19 @@ class VariablesOnFitness(VariablesOnStat):
 
 class MakeSpan(Fitness):
     def __init__(self, parser, tracer):
-        Fitness.__init__(self, parser, tracer, 2, 'Makespan', title='Makespan')
+        Fitness.__init__(self, parser, tracer, idx=2, pattern='Makespan', title='Makespan')
 
 class VariablesOnMakeSpan(VariablesOnFitness):
     def __init__(self, parser, tracer):
-        VariablesOnFitness.__init__(self, parser, tracer, 'MAKESPAN_IDX', 'Makespan', title='Makespan')
+        VariablesOnFitness.__init__(self, parser, tracer, idx_name='MAKESPAN_IDX', pattern='Makespan', title='Makespan')
 
 class TotalCost(Fitness):
     def __init__(self, parser, tracer):
-        Fitness.__init__(self, parser, tracer, 3, 'TotalCost', title='Total cost')
+        Fitness.__init__(self, parser, tracer, idx=3, pattern='TotalCost', title='Total cost')
 
 class VariablesOnTotalCost(VariablesOnFitness):
     def __init__(self, parser, tracer):
-        VariablesOnFitness.__init__(self, parser, tracer, 'TOTALCOST_IDX', 'TotalCost', title='Total cost')
+        VariablesOnFitness.__init__(self, parser, tracer, idx_name='TOTALCOST_IDX', pattern='TotalCost', title='Total cost')
 
 class SpeedUp(Stat):
     def __init__(self, parser, tracer, idx, pattern):
