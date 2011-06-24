@@ -206,10 +206,9 @@ class AbsoluteTimeProportions(Tracer):
                     if self.ybound:
                         ax.set_ybound(0, self.ybound)
 
-                tree['MANGLENAME'] = options.manglename_pattern % tree
-                tree['FILENAME'] = '%(MANGLENAME)s.pdf' % tree
-
                 if not options.plot_on_window:
+                    tree['MANGLENAME'] = options.manglename_pattern % tree
+                    tree['FILENAME'] = '%(MANGLENAME)s.pdf' % tree
                     fig.savefig('%(GRAPHDIR)s/TimeRatesByOperator_%(FILENAME)s' % tree, format='pdf', dpi=280)
 
         if options.plot_on_window:
@@ -442,11 +441,81 @@ class VariablesOnGlobalTimeSpeedup(VariablesOnTracer):
                     if tree['XBOUND']: ax.set_xbound(0, tree['XBOUND'])
                     if tree['YBOUND']: ax.set_ybound(0, tree['YBOUND'])
 
-                tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
-                tree['FILENAME'] = '%(MANGLENAME)s.pdf' % tree
+                if not tree['PLOT_ON_WINDOW']:
+                    tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
+                    tree['FILENAME'] = '%(MANGLENAME)s.pdf' % tree
+                    fig.savefig('%(GRAPHDIR)s/GlobalTimeSpeedup_%(FILENAME)s' % tree, format='pdf', dpi=280)
+
+        if tree['PLOT_ON_WINDOW']:
+            pl.show()
+
+class VariablesOnGlobalEfficiency(VariablesOnTracer):
+    """
+    A high level tracer for multiple boxplots in order to compare several data having commons parameters. The parameter used here is the efficiency.
+    """
+
+    def __init__(self, parser, xlabel=None, ylabel=None, xbound=None, ybound=None):
+        VariablesOnTracer.__init__(self, parser)
+
+        self.title = 'Efficiency'
+        self.xlabel = xlabel
+        self.ylabel = ylabel
+        self.xbound = xbound
+        self.ybound = ybound
+
+        self.values = [0]
+
+    def trace(self, options, tree):
+        import pylab as pl
+
+        tree['FIELD'] = 'RESTART' if tree['RESTART'] else ''
+        tree['SCHEMA'] = 'DYNAMIC' if tree['DYNAMIC'] else 'STATIC'
+
+        tree['TITLE'] = self.title
+
+        fig = pl.figure()
+
+        for tree['CORESIZE'] in tree['CORESIZES']:
+            for tree['COMMAND'] in tree['BINARIES']:
+                ax = fig.add_subplot(111)
+
+                for i in xrange(len(tree['SAMPLES'])):
+                    pos, color = tree['PROPERTIES'][i]
+                    tree['NAME'] = tree['SAMPLES'][i][0]
+
+                    data = []
+
+                    for tree['POPSIZE'] in tree['POPSIZES']:
+                        tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
+
+                        data.append(eval(open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data' % tree).readline()))
+
+                    r = ax.boxplot(data, positions=[x-pos for x in xrange(len(data))], widths=0.1)
+
+                    for value in r.values():
+                        pl.setp(value, color=color)
+
+                # if tree['LEGEND']:
+                #     ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], tree['PROPERTIES'][i][1]) for i in xrange(len(tree['SAMPLES']))]))
+
+                ax.set_xlabel('# populations')
+                ax.set_ylabel('Efficiency')
+
+                for first, second, func in [
+                    (None, tree['POPSIZES'], ax.set_xticklabels),
+                    (self.xlabel, tree['XLABEL'], ax.set_xlabel),
+                    (self.ylabel, tree['YLABEL'], ax.set_ylabel),
+                    (self.xbound, tree['XBOUND'], ax.set_xbound),
+                    (self.ybound, tree['YBOUND'], ax.set_ybound),
+                    (self.title, tree['TITLE'], ax.set_title),
+                    ]:
+                    if first: func(first)
+                    elif second: func(second)
 
                 if not tree['PLOT_ON_WINDOW']:
-                    fig.savefig('%(GRAPHDIR)s/TimeRatesByOperator_%(FILENAME)s' % tree, format='pdf', dpi=280)
+                    tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
+                    tree['FILENAME'] = '%(MANGLENAME)s.pdf' % tree
+                    fig.savefig('%(GRAPHDIR)s/GlobalEfficiency_%(FILENAME)s' % tree, format='pdf', dpi=280)
 
         if tree['PLOT_ON_WINDOW']:
             pl.show()

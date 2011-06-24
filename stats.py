@@ -220,8 +220,7 @@ class SpeedUp(Stat):
 
         diffs = []
 
-        for num in xrange(1, options.nruns+1):
-            tree['NUM'] = num
+        for tree['NUM'] in xrange(1, options.nruns+1):
             tree['TIME_FILENAME'] = options.timefilename_pattern % tree
 
             data = open(tree['TIME_FILENAME']).readlines()
@@ -251,8 +250,7 @@ class VariablesOnSpeedUp(VariablesOnStat):
         idx = tree[self.idx_name]
         diffs = []
 
-        for num in xrange(1, tree['NRUNS']+1):
-            tree['NUM'] = num
+        for tree['NUM'] in xrange(1, tree['NRUNS']+1):
             tree['TIME_FILENAME'] = '%(TIMEFILENAME_PATTERN)s' % tree % tree
 
             data = open(tree['TIME_FILENAME']).readlines()
@@ -280,8 +278,7 @@ class Efficiency(Stat):
 
         diffs = []
 
-        for num in xrange(1, options.nruns+1):
-            tree['NUM'] = num
+        for tree['NUM'] in xrange(1, options.nruns+1):
             tree['TIME_FILENAME'] = options.timefilename_pattern % tree
 
             data = open(tree['TIME_FILENAME']).readlines()
@@ -308,16 +305,21 @@ class VariablesOnEfficiency(VariablesOnStat):
     def callit(self, options, tree):
         tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
 
-        idx = tree[self.idx_name]
         diffs = []
 
-        for num in xrange(1, tree['NRUNS']+1):
-            tree['NUM'] = num
+        for tree['NUM'] in xrange(1, tree['NRUNS']+1):
             tree['TIME_FILENAME'] = '%(TIMEFILENAME_PATTERN)s' % tree % tree
+
+            idx = tree[self.idx_name]
 
             data = open(tree['TIME_FILENAME']).readlines()
 
             if len(data) <= idx: continue
+
+            if 'Command exited' in data[0]:
+                idx += 1
+                if len(data) <= idx: continue
+
             if self.pattern not in data[idx]: continue
 
             diff = float(data[idx].split()[-1][:-1]) / tree["CORESIZE"] * 1/100
@@ -334,7 +336,7 @@ class TimeSpeedUp(SpeedUp):
 
 class VariablesOnTimeSpeedUp(VariablesOnSpeedUp):
     def __init__(self, parser, tracer):
-        VariablesOnSpeedUp.__init__(self, parser, tracer, 'SPEEDUP_IDX', 'Percent of CPU this job got')
+        VariablesOnSpeedUp.__init__(self, parser, tracer, idx_name='SPEEDUP_IDX', pattern='Percent of CPU this job got')
 
 class TimeEfficiency(Efficiency):
     def __init__(self, parser, tracer, idx=3):
@@ -342,7 +344,7 @@ class TimeEfficiency(Efficiency):
 
 class VariablesOnTimeEfficiency(VariablesOnEfficiency):
     def __init__(self, parser, tracer):
-        VariablesOnEfficiency.__init__(self, parser, tracer, 'EFFICIENCY_IDX', 'Percent of CPU this job got')
+        VariablesOnEfficiency.__init__(self, parser, tracer, idx_name='EFFICIENCY_IDX', pattern='Percent of CPU this job got')
 
 class ElapsedTime(Stat):
     def __init__(self, parser, tracer, idx, pattern, title="Elapsed time", rate=False):
@@ -357,8 +359,7 @@ class ElapsedTime(Stat):
 
         times = []
 
-        for num in xrange(1, options.nruns+1):
-            tree['NUM'] = num
+        for tree['NUM'] in xrange(1, options.nruns+1):
             tree['RES_FILENAME'] = options.resfilename_pattern % tree
 
             data = open(tree['RES_FILENAME']).readlines()
@@ -415,8 +416,7 @@ class VariablesOnElapsedTime(VariablesOnStat):
         idx = tree[self.idx_name]
         times = []
 
-        for num in xrange(1, tree['NRUNS']+1):
-            tree['NUM'] = num
+        for tree['NUM'] in xrange(1, tree['NRUNS']+1):
             tree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % tree % tree
 
             data = open(tree['RES_FILENAME']).readlines()
@@ -501,8 +501,7 @@ class ElapsedTimeCommand(Stat):
 
         times = []
 
-        for num in xrange(1, options.nruns+1):
-            tree['NUM'] = num
+        for tree['NUM'] in xrange(1, options.nruns+1):
             tree['RES_FILENAME'] = options.resfilename_pattern % tree
             tree['TIME_FILENAME'] = options.timefilename_pattern % tree
 
