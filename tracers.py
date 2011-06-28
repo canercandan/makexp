@@ -519,3 +519,122 @@ class VariablesOnGlobalEfficiency(VariablesOnTracer):
 
         if tree['PLOT_ON_WINDOW']:
             pl.show()
+
+class VariablesOnQualityPerDomain(VariablesOnTracer):
+    def __init__(self, parser):
+        VariablesOnTracer.__init__(self, parser)
+
+        self.values = [0]
+
+    def trace(self, options, tree):
+        if not options.other_topic:
+            raise ValueError('option --other_topic (-O) is missing')
+
+        otree = tree['OTHER']
+
+        import pylab as pl
+
+        tree['FIELD'] = 'RESTART' if tree['RESTART'] else ''
+        otree['FIELD'] = 'RESTART' if otree['RESTART'] else ''
+
+        tree['SCHEMA'] = 'DYNAMIC' if tree['DYNAMIC'] else 'STATIC'
+        otree['SCHEMA'] = 'DYNAMIC' if otree['DYNAMIC'] else 'STATIC'
+
+        fig = pl.figure()
+
+        assert tree['CORESIZES'] == otree['CORESIZES']
+
+        for tree['CORESIZE'] in tree['CORESIZES']:
+            otree['CORESIZE'] = tree['CORESIZE']
+
+            assert tree['BINARIES'] == otree['BINARIES']
+
+            for tree['COMMAND'] in tree['BINARIES']:
+                otree['COMMAND'] = tree['COMMAND']
+
+                assert tree['SAMPLES'] == otree['SAMPLES']
+
+                for tree['NAME'], dummy, dummy in tree['SAMPLES']:
+                    otree['NAME'] = tree['NAME']
+
+                    ax = fig.add_subplot(111)
+
+                    # pos, color = tree['PROPERTIES'][i]
+                    data = []
+                    odata = []
+
+                    assert tree['POPSIZES'] == otree['POPSIZES']
+
+                    for tree['POPSIZE'] in tree['POPSIZES']:
+                        otree['POPSIZE'] = tree['POPSIZE']
+
+                        tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
+                        otree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % otree % otree
+
+                        tree['NUM'] = otree['NUM'] = ''
+                        tree['PLAN_FILENAME'] = '%(PLANFILENAME_PATTERN)s' % tree % tree
+                        otree['PLAN_FILENAME'] = '%(PLANFILENAME_PATTERN)s' % otree % otree
+
+                        def listit(t):
+                            fitnesses = []
+                            idx = t[self.idx_name]
+
+                            dirs = listdir(t['RESDIR'])
+                            dirs.sort()
+                            for t['FILENAME'] in dirs:
+                                f = '%(RESDIR)s/%(FILENAME)s' % t
+
+                                if t['PLAN_FILENAME'] in f and '.last' in f:
+                                    data = open(f).readlines()
+
+                                    if len(data) <= idx: continue
+                                    if self.pattern not in data[idx]: continue
+
+                                    fitness = int(data[idx].split()[-1])
+                                    fitnesses.append(fitness)
+
+                            return fitnesses
+
+                        # def writeit(t, fitnesses):
+                        #     if len(fitnesses) > 0:
+                        #         t['TITLE'] = self.title.replace(' ', '_')
+                        #         open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data' % t, 'w').write(str(fitnesses))
+
+                        f = listit(tree)
+                        print 'current', f
+                        data.append(f)
+                        # writeit(tree, f)
+
+                        f = listit(otree)
+                        print 'other', f
+                        odata.append(f)
+                        # writeit(otree, f)
+
+                    r = ax.boxplot(data, positions=[x for x in xrange(len(data))], widths=0.1)
+                    orr = ax.boxplot(odata, positions=[x-0.2 for x in xrange(len(odata))], widths=0.1)
+
+                    for value in r.values():
+                        pl.setp(value, color=color)
+
+                ax.set_xticklabels(tree['POPSIZES'])
+
+                if tree['LEGEND']:
+                    if k == len(self.ratetimes)-1:
+                        ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], tree['PROPERTIES'][i][1]) for i in xrange(len(tree['SAMPLES']))]))
+
+                ax.set_title('%(TITLE)s' % tree)
+
+                if tree['XLABEL']: ax.set_xlabel(tree['XLABEL'])
+
+                ax.set_ylabel('Speedup')
+
+                if tree['XBOUND']: ax.set_xbound(0, tree['XBOUND'])
+                if tree['YBOUND']: ax.set_ybound(0, tree['YBOUND'])
+
+                if not tree['PLOT_ON_WINDOW']:
+                    tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
+                    tree['FILENAME'] = '%(MANGLENAME)s.pdf' % tree
+                    fig.savefig('%(GRAPHDIR)s/GlobalTimeSpeedup_%(FILENAME)s' % tree, format='pdf', dpi=280)
+
+        if tree['PLOT_ON_WINDOW']:
+            pl.show()
