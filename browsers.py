@@ -332,88 +332,60 @@ class VariablesOnDo(Browser):
 
         self.browseAll(tree)
 
-class Sample(Browser):
-    def __init__(self, parser, samples, browser=None):
-        Browser.__init__(self, parser, browser)
-        self.samples = samples
-
-    def browse(self, options, tree):
-        for name, domain, instance in self.samples:
-            tree['NAME'] = name
-            tree['DOMAIN'] = domain
-            tree['INSTANCE'] = instance
-
-            self.browseAll(tree)
-
 class VariablesOnSample(Browser):
     def __init__(self, parser, browser=None):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
-        for name, domain, instance in tree['SAMPLES']:
-            tree['NAME'] = name
-            tree['DOMAIN'] = domain
-            tree['INSTANCE'] = instance
-
+        for tree['NAME'], tree['DOMAIN'], tree['INSTANCE'] in tree['SAMPLES']:
             self.browseAll(tree)
 
-class Pop(Browser):
-    def __init__(self, parser, popsizes, browser=None):
-        Browser.__init__(self, parser, browser)
-        self.popsizes = popsizes
+class Sample(VariablesOnSample):
+    def __init__(self, parser, samples, browser=None):
+        VariablesOnSample.__init__(self, parser, browser)
+        self.samples = samples
 
     def browse(self, options, tree):
-        tree['POPSIZES'] = self.popsizes
-        for size in self.popsizes:
-            tree['POPSIZE'] = size
-
-            self.browseAll(tree)
+        tree['SAMPLES'] = self.samples
+        VariablesOnSample.browse(self, options, tree)
 
 class VariablesOnPop(Browser):
     def __init__(self, parser, browser=None):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
-        for size in tree['POPSIZES']:
-            tree['POPSIZE'] = size
-
+        for tree['POPSIZE'] in tree['POPSIZES']:
             self.browseAll(tree)
 
-class Core(Browser):
-    def __init__(self, parser, coresizes, browser=None, parallelize=True):
-        Browser.__init__(self, parser, browser)
-
-        parser.add_option('-L', '--parallelize', action='store_true', default=parallelize, help='with parallelization')
-
-        self.coresizes = coresizes
+class Pop(VariablesOnPop):
+    def __init__(self, parser, popsizes, browser=None):
+        VariablesOnPop.__init__(self, parser, browser)
+        self.popsizes = popsizes
 
     def browse(self, options, tree):
-        tree['CORESIZES'] = self.coresizes
-        for size in self.coresizes:
-            tree['CORESIZE'] = size
-            tree['PARALLELIZE'] = options.parallelize
-
-            self.browseAll(tree)
+        tree['POPSIZES'] = self.popsizes
+        VariablesOnPop.browse(self, options, tree)
 
 class VariablesOnCore(Browser):
     def __init__(self, parser, browser=None):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
-        for size in tree['CORESIZES']:
-            tree['CORESIZE'] = size
-
+        for tree['CORESIZE'] in tree['CORESIZES']:
             self.browseAll(tree)
 
-class Sequential(Browser):
-    def __init__(self, parser, browser=None):
-        Browser.__init__(self, parser, browser)
+class Core(VariablesOnCore):
+    def __init__(self, parser, coresizes, browser=None, parallelize=True):
+        VariablesOnCore.__init__(self, parser, browser)
+
+        parser.add_option('-L', '--parallelize', action='store_true', default=parallelize, help='with parallelization')
+
+        self.coresizes = coresizes
 
     def browse(self, options, tree):
-        tree['CORESIZE'] = 1
-        tree['PARALLELIZE'] = False
-
-        self.browseAll(tree)
+        tree['PARALLELIZE'] = options.parallelize
+        tree['CORESIZES'] = self.coresizes
+        VariablesOnCore.browse(self, options, tree)
 
 class VariablesOnSequential(Browser):
     def __init__(self, parser, browser=None):
@@ -425,17 +397,12 @@ class VariablesOnSequential(Browser):
 
         self.browseAll(tree)
 
-class Restart(Browser):
-    def __init__(self, parser, browser=None, restart=False):
-        Browser.__init__(self, parser, browser)
-
-        parser.add_option('-R', '--restart', action='store_true', default=restart, help='with restarts')
+class Sequential(VariablesOnSequential):
+    def __init__(self, parser, browser=None):
+        VariablesOnSequential.__init__(self, parser, browser)
 
     def browse(self, options, tree):
-        tree['FIELD'] = 'RESTART' if options.restart else ''
-        tree['RUNMAX'] = 0 if options.restart else 1
-
-        self.browseAll(tree)
+        VariablesOnSequential.browse(self, options, tree)
 
 class VariablesOnRestart(Browser):
     def __init__(self, parser, browser=None):
@@ -447,39 +414,30 @@ class VariablesOnRestart(Browser):
 
         self.browseAll(tree)
 
-class Starting(Browser):
-    def __init__(self, parser, browser=None):
-        Browser.__init__(self, parser, browser)
+class Restart(VariablesOnRestart):
+    def __init__(self, parser, browser=None, restart=False):
+        VariablesOnRestart.__init__(self, parser, browser)
+
+        parser.add_option('-R', '--restart', action='store_true', default=restart, help='with restarts')
 
     def browse(self, options, tree):
-        for field in ['', 'RESTART']:
-            tree['FIELD'] = field
-            tree['RUNMAX'] = 0 if field == 'RESTART' else 1
-
-            self.browseAll(tree)
+        tree['RESTART'] = options.restart
+        VariablesOnRestart.browse(self, options, tree)
 
 class VariablesOnStarting(Browser):
     def __init__(self, parser, browser=None):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
-        for field in ['', 'RESTART']:
-            tree['FIELD'] = field
-            tree['RUNMAX'] = 0 if field == 'RESTART' else 1
-
+        for tree['FIELD'], tree['RUNMAX'] in [('', 1), ('RESTART', 0)]:
             self.browseAll(tree)
 
-class Dynamic(Browser):
-    def __init__(self, parser, browser=None, dynamic=False):
-        Browser.__init__(self, parser, browser)
-
-        parser.add_option('-D', '--dynamic', action='store_true', default=dynamic, help='use the dynamic scheduler in openmp')
+class Starting(VariablesOnStarting):
+    def __init__(self, parser, browser=None):
+        VariablesOnStarting.__init__(self, parser, browser)
 
     def browse(self, options, tree):
-        tree['SCHEMA'] = 'DYNAMIC' if options.dynamic else 'STATIC'
-        tree['SCHEMABOOL'] = options.dynamic
-
-        self.browseAll(tree)
+        VariablesOnStarting.browse(self, options, browser)
 
 class VariablesOnDynamic(Browser):
     def __init__(self, parser, browser=None):
@@ -491,46 +449,30 @@ class VariablesOnDynamic(Browser):
 
         self.browseAll(tree)
 
-class Schema(Browser):
-    def __init__(self, parser, browser=None):
-        Browser.__init__(self, parser, browser)
+class Dynamic(VariablesOnDynamic):
+    def __init__(self, parser, browser=None, dynamic=False):
+        VariablesOnDynamic.__init__(self, parser, browser)
+
+        parser.add_option('-D', '--dynamic', action='store_true', default=dynamic, help='use the dynamic scheduler in openmp')
 
     def browse(self, options, tree):
-        for schema in ['STATIC', 'DYNAMIC']:
-            tree['SCHEMA'] = schema
-            tree['SCHEMABOOL'] = 1 if schema == 'DYNAMIC' else 0
-
-            self.browseAll(tree)
+        tree['DYNAMIC'] = options.dynamic
+        VariablesOnDynamic.browse(self, options, tree)
 
 class VariablesOnSchema(Browser):
     def __init__(self, parser, browser=None):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
-        for schema in ['STATIC', 'DYNAMIC']:
-            tree['SCHEMA'] = schema
-            tree['SCHEMABOOL'] = 1 if schema == 'DYNAMIC' else 0
-
+        for tree['SCHEMA'], tree['SCHEMABOOL'] in [('STATIC', 0), ('DYNAMIC', 1)]:
             self.browseAll(tree)
 
-class Command(Browser):
-    def __init__(self, parser, commands, browser=None, binarypath='.'):
-        Browser.__init__(self, parser, browser)
-
-        parser.add_option('-B', '--binarypath', default=binarypath, help='give here binaries\' path')
-
-        self.commands = commands
+class Schema(VariablesOnSchema):
+    def __init__(self, parser, browser=None):
+        VariablesOnSchema.__init__(self, parser, browser)
 
     def browse(self, options, tree):
-        tree['BINARYPATH'] = options.binarypath
-
-        for command in self.commands:
-            tree['COMMAND'] = command
-
-            if options.execute:
-                shutil.copy2('%(BINARYPATH)s/%(COMMAND)s' % tree, '%(MAKEXPDIR)s/' % tree)
-
-            self.browseAll(tree)
+        VariablesOnSchema.browse(self, options, tree)
 
 class VariablesOnCommand(Browser):
     def __init__(self, parser, browser=None):
@@ -543,57 +485,36 @@ class VariablesOnCommand(Browser):
 
             self.browseAll(tree)
 
-class Range(Browser):
-    def __init__(self, parser, browser=None, nruns=1):
-        Browser.__init__(self, parser, browser)
+class Command(VariablesOnCommand):
+    def __init__(self, parser, commands, browser=None, binarypath='.'):
+        VariablesOnCommand.__init__(self, parser, browser)
 
-        parser.add_option('-N', '--nruns', type='int', default=nruns, help='give here a number of runs')
+        parser.add_option('-B', '--binarypath', default=binarypath, help='give here binaries\' path')
+
+        self.commands = commands
 
     def browse(self, options, tree):
-        for num in xrange(1, options.nruns+1):
-            tree["NUM"] = num
-
-            self.browseAll(tree)
+        tree['BINARYPATH'] = options.binarypath
+        tree['BINARIES'] = self.commands
+        VariablesOnCommand.browse(self, options, tree)
 
 class VariablesOnRange(Browser):
     def __init__(self, parser, browser=None):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
-        for num in xrange(1, tree['NRUNS']+1):
-            tree['NUM'] = num
-
+        for tree['NUM'] in xrange(1, tree['NRUNS']+1):
             self.browseAll(tree)
 
-class Execute(Browser):
-    def __init__(self, parser, seed=0, runmax=0, gensteady=50, timelimit=1800, stat=None):
-        Browser.__init__(self, parser, stat=stat)
+class Range(VariablesOnRange):
+    def __init__(self, parser, browser=None, nruns=1):
+        VariablesOnRange.__init__(self, parser, browser)
 
-        parser.add_option('-s', '--seed', type='int', default=seed, help='with seed fixed, seed=0 means seed defined randomly')
-        parser.add_option('-M', '--runmax', type='int', default=runmax, help='with runmax fixed, runmax=0 means no limit')
-        parser.add_option('-G', '--gensteady', type='int', default=gensteady, help='with gensteady fixed')
-        parser.add_option('-T', '--timelimit', type='int', default=timelimit, help='with timelimit fixed')
+        parser.add_option('-N', '--nruns', type='int', default=nruns, help='give here a number of runs')
 
     def browse(self, options, tree):
-        tree['MANGLENAME'] = options.manglename_pattern % tree
-        tree['TIME_FILENAME'] = options.timefilename_pattern % tree
-        tree['RES_FILENAME'] = options.resfilename_pattern % tree
-        tree['PLAN_FILENAME'] = options.planfilename_pattern % tree
-
-        if options.runmax:
-            tree['RUNMAX'] = options.runmax
-
-        tree['SEED'] = options.seed
-        tree['GENSTEADY'] = options.gensteady
-        tree['TIMELIMIT'] = options.timelimit
-
-        cmd = options.command_pattern % tree
-
-        self.logger.debug(cmd)
-
-        if options.execute:
-            p = subprocess.Popen( cmd, shell=True )
-            p.wait()
+        tree['NRUNS'] = options.nruns
+        VariablesOnRange.browse(self, options, tree)
 
 class VariablesOnExecute(Browser):
     def __init__(self, parser, stat=None):
@@ -604,14 +525,37 @@ class VariablesOnExecute(Browser):
         tree['TIME_FILENAME'] = '%(TIMEFILENAME_PATTERN)s' % tree % tree
         tree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % tree % tree
         tree['PLAN_FILENAME'] = '%(PLANFILENAME_PATTERN)s' % tree % tree
+        tree['PROCESS_COMMAND'] = '%(COMMAND_PATTERN)s' % tree % tree
 
-        cmd = '%(COMMAND_PATTERN)s' % tree % tree
-
-        self.logger.debug(cmd)
+        self.logger.debug('%(PROCESS_COMMAND)s' % tree)
 
         if tree['EXECUTE']:
-            p = subprocess.Popen( cmd, shell=True )
+            p = subprocess.Popen('%(PROCESS_COMMAND)s' % tree, shell=True)
             p.wait()
+
+class Execute(VariablesOnExecute):
+    def __init__(self, parser, seed=0, runmax=0, gensteady=50, timelimit=1800, stat=None):
+        VariablesOnExecute.__init__(self, parser, stat=stat)
+
+        parser.add_option('-s', '--seed', type='int', default=seed, help='with seed fixed, seed=0 means seed defined randomly')
+        parser.add_option('-M', '--runmax', type='int', default=runmax, help='with runmax fixed, runmax=0 means no limit')
+        parser.add_option('-G', '--gensteady', type='int', default=gensteady, help='with gensteady fixed')
+        parser.add_option('-T', '--timelimit', type='int', default=timelimit, help='with timelimit fixed')
+
+    def browse(self, options, tree):
+        tree['MANGLENAME_PATTERN'] = options.manglename_pattern
+        tree['TIMEFILENAME_PATTERN'] = options.timefilename_pattern
+        tree['RESFILENAME_PATTERN'] = options.resfilename_pattern
+        tree['PLANFILENAME_PATTERN'] = options.planfilename_pattern
+        tree['COMMAND_PATTERN'] = options.command_patten
+
+        if options.runmax: tree['RUNMAX'] = options.runmax
+        tree['SEED'] = options.seed
+        tree['GENSTEADY'] = options.gensteady
+        tree['TIMELIMIT'] = options.timelimit
+        tree['EXECUTE'] = options.execute
+
+        VariablesOnExecute.browse(self, options, tree)
 
 class Dummy(Browser):
     def __init__(self, parser):
