@@ -291,6 +291,83 @@ class VariablesOnAbsoluteTimeProportions(VariablesOnTracer):
         if tree['PLOT_ON_WINDOW']:
             pl.show()
 
+class VariablesOnAbsoluteTimeProportionsPerCores(VariablesOnTracer):
+    """
+    A high level tracer for multiple boxplots in order to compare several data having commons parameters.
+    """
+
+    def __init__(self, parser, ratetimes=[], title=None, xlabel=None, ylabel=None):
+        VariablesOnTracer.__init__(self, parser)
+
+        self.ratetimes = ratetimes
+
+        self.title = title
+        self.xlabel = xlabel
+        self.ylabel = ylabel
+
+        self.values = [0]
+
+    def trace(self, options, tree):
+        import pylab as pl
+
+        tree['FIELD'] = 'RESTART' if tree['RESTART'] else ''
+        tree['SCHEMA'] = 'DYNAMIC' if tree['DYNAMIC'] else 'STATIC'
+
+        fig = pl.figure()
+
+        for tree['POPSIZE'] in tree['POPSIZES']:
+            for tree['COMMAND'] in tree['BINARIES']:
+                axes = []
+
+                for k in xrange(len(self.ratetimes)):
+                    tree['TITLE'] = self.ratetimes[k]
+                    ax = fig.add_subplot(1, len(self.ratetimes), k+1)
+
+                    for i in xrange(len(tree['SAMPLES'])):
+                        pos, color = tree['PROPERTIES'][i]
+                        tree['NAME'] = tree['SAMPLES'][i][0]
+
+                        data = []
+
+                        for tree['CORESIZE'] in tree['CORESIZES']:
+                            tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
+
+                            data.append(eval(open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.time' % tree).readline()))
+
+                        r = ax.boxplot(data, positions=[x-pos for x in xrange(len(data))], widths=0.1)
+
+                        for value in r.values():
+                            pl.setp(value, color=color)
+
+                    if tree['LEGEND']:
+                        if k == len(self.ratetimes)-1:
+                            ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], tree['PROPERTIES'][i][1]) for i in xrange(len(tree['SAMPLES']))]))
+
+                    ax.set_xlabel('# cores')
+                    ax.set_ylabel('Absolute time')
+
+                    for first, second, func in [
+                        (None, tree['CORESIZES'], ax.set_xticklabels),
+                        (self.xlabel, tree['XLABEL'], ax.set_xlabel),
+                        (self.ylabel, tree['YLABEL'], ax.set_ylabel),
+                        (self.title, tree['TITLE'], ax.set_title),
+                        ]:
+                        if first: func(first)
+                        elif second: func(second)
+
+                    axes.append(ax)
+
+                max_bound = max([ax.get_ybound() for ax in axes])
+                for ax in axes: ax.set_ybound(max_bound)
+
+                if not tree['PLOT_ON_WINDOW']:
+                    tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
+                    tree['FILENAME'] = '%(MANGLENAME)s.pdf' % tree
+                    fig.savefig('%(GRAPHDIR)s/TimeRatesByOperator_%(FILENAME)s' % tree, format='pdf', dpi=280)
+
+        if tree['PLOT_ON_WINDOW']:
+            pl.show()
+
 class OperatorsTimeProportions(AbsoluteTimeProportions):
     def __init__(self, parser, popsizes=None, coresizes=None, binaries=None, samples=None, restart=False, ybound=None):
         AbsoluteTimeProportions.__init__(self, parser, popsizes, coresizes, binaries, samples, restart=restart, ybound=ybound,
@@ -316,6 +393,11 @@ class VariablesOnGlobalAbsoluteTime(VariablesOnAbsoluteTimeProportions):
     def __init__(self, parser, title=None, xlabel=None, ylabel=None):
         VariablesOnAbsoluteTimeProportions.__init__(self, parser, ratetimes=['Global_elapsed_rate_time'],
                                                     title=title, xlabel=xlabel, ylabel=ylabel)
+
+class VariablesOnGlobalAbsoluteTimePerCores(VariablesOnAbsoluteTimeProportionsPerCores):
+    def __init__(self, parser, title=None, xlabel=None, ylabel=None):
+        VariablesOnAbsoluteTimeProportionsPerCores.__init__(self, parser, ratetimes=['Global_elapsed_rate_time'],
+                                                            title=title, xlabel=xlabel, ylabel=ylabel)
 
 class VariablesOnGlobalTimeSpeedup(VariablesOnTracer):
     def __init__(self, parser):
@@ -519,3 +601,101 @@ class VariablesOnGlobalEfficiency(VariablesOnTracer):
 
         if tree['PLOT_ON_WINDOW']:
             pl.show()
+
+class VariablesOnMultiInstance(VariablesOnTracer):
+    """
+    A high level tracer for multiple boxplots in order to compare several data having commons parameters.
+    """
+
+    def __init__(self, parser, title, keysA=('CORESIZE', 'CORESIZES'), keysB=('POPSIZE', 'POPSIZES'), xlabel=None, ylabel=None, xbound=None, ybound=None):
+        VariablesOnTracer.__init__(self, parser)
+
+        self.title = title
+        self.keysA = keysA
+        self.keysB = keysB
+        self.xlabel = xlabel
+        self.ylabel = ylabel
+        self.xbound = xbound
+        self.ybound = ybound
+
+        self.values = [0]
+
+    def trace(self, options, tree):
+        import pylab as pl
+
+        tree['FIELD'] = 'RESTART' if tree['RESTART'] else ''
+        tree['SCHEMA'] = 'DYNAMIC' if tree['DYNAMIC'] else 'STATIC'
+
+        tree['TITLE'] = self.title
+
+        fig = pl.figure()
+
+        itemA, tabA = self.keysA
+        for tree[itemA] in tree[tabA]:
+            for tree['COMMAND'] in tree['BINARIES']:
+                ax = fig.add_subplot(111)
+
+                for i in xrange(len(tree['SAMPLES'])):
+                    pos, color = tree['PROPERTIES'][i]
+                    tree['NAME'] = tree['SAMPLES'][i][0]
+
+                    data = []
+
+                    itemB, tabB = self.keysB
+                    for tree[itemB] in tree[tabB]:
+                        tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
+
+                        data.append(eval(open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data' % tree).readline()))
+
+                    r = ax.boxplot(data, positions=[x-pos for x in xrange(len(data))], widths=0.1)
+
+                    for value in r.values():
+                        pl.setp(value, color=color)
+
+                # if tree['LEGEND']:
+                #     ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], tree['PROPERTIES'][i][1]) for i in xrange(len(tree['SAMPLES']))]))
+
+                ax.set_ylabel(self.title)
+
+                for first, second, func in [
+                    (None, tree[self.keysB[1]], ax.set_xticklabels),
+                    (self.xlabel, tree['XLABEL'], ax.set_xlabel),
+                    (self.ylabel, tree['YLABEL'], ax.set_ylabel),
+                    (self.xbound, tree['XBOUND'], ax.set_xbound),
+                    (self.ybound, tree['YBOUND'], ax.set_ybound),
+                    (self.title, tree['TITLE'], ax.set_title),
+                    ]:
+                    if first: func(first)
+                    elif second: func(second)
+
+                if not tree['PLOT_ON_WINDOW']:
+                    tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
+                    tree['FILENAME'] = '%(MANGLENAME)s.pdf' % tree
+                    fig.savefig('%(GRAPHDIR)s/GlobalEfficiency_%(FILENAME)s' % tree, format='pdf', dpi=280)
+
+        if tree['PLOT_ON_WINDOW']:
+            pl.show()
+
+class VariablesOnMultiInstancePerPops(VariablesOnMultiInstance):
+    def __init__(self, parser, title, ylabel=None, xbound=None, ybound=None):
+        VariablesOnMultiInstance.__init__(self, parser, title=title, keysA=('CORESIZE', 'CORESIZES'), keysB=('POPSIZE', 'POPSIZES'), xlabel='# populations', ylabel=ylabel, xbound=xbound, ybound=ybound)
+
+class VariablesOnSpeedupMultiInstancesPerPops(VariablesOnMultiInstancePerPops):
+    def __init__(self, parser, ylabel=None, xbound=None, ybound=None):
+        VariablesOnMultiInstancePerPops.__init__(self, parser, title='Speedup', ylabel=ylabel, xbound=xbound, ybound=ybound)
+
+class VariablesOnEfficiencyMultiInstancesPerPops(VariablesOnMultiInstancePerPops):
+    def __init__(self, parser, ylabel=None, xbound=None, ybound=None):
+        VariablesOnMultiInstancePerPops.__init__(self, parser, title='Efficiency', ylabel=ylabel, xbound=xbound, ybound=ybound)
+
+class VariablesOnMultiInstancePerCores(VariablesOnMultiInstance):
+    def __init__(self, parser, title, ylabel=None, xbound=None, ybound=None):
+        VariablesOnMultiInstance.__init__(self, parser, title=title, keysA=('POPSIZE', 'POPSIZES'), keysB=('CORESIZE', 'CORESIZES'), xlabel='# cores', ylabel=ylabel, xbound=xbound, ybound=ybound)
+
+class VariablesOnSpeedupMultiInstancesPerCores(VariablesOnMultiInstancePerCores):
+    def __init__(self, parser, ylabel=None, xbound=None, ybound=None):
+        VariablesOnMultiInstancePerCores.__init__(self, parser, title='Speedup', ylabel=ylabel, xbound=xbound, ybound=ybound)
+
+class VariablesOnEfficiencyMultiInstancesPerCores(VariablesOnMultiInstancePerCores):
+    def __init__(self, parser, ylabel=None, xbound=None, ybound=None):
+        VariablesOnMultiInstancePerCores.__init__(self, parser, title='Efficiency', ylabel=ylabel, xbound=xbound, ybound=ybound)
