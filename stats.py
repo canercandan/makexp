@@ -223,12 +223,19 @@ class SpeedUp(Stat):
         for tree['NUM'] in xrange(1, options.nruns+1):
             tree['TIME_FILENAME'] = options.timefilename_pattern % tree
 
+            idx = self.idx
+
             data = open(tree['TIME_FILENAME']).readlines()
 
-            if len(data) <= self.idx: continue
-            if self.pattern not in data[self.idx]: continue
+            if len(data) <= idx: continue
 
-            diff = float(data[self.idx].split()[-1][:-1]) / 100
+            if 'Command exited' in data[0]:
+                idx += 1
+                if len(data) <= idx: continue
+
+            if self.pattern not in data[idx]: continue
+
+            diff = float(data[idx].split()[-1][:-1]) / 100
             diffs.append(diff)
 
         if len(diffs) > 0:
@@ -247,15 +254,21 @@ class VariablesOnSpeedUp(VariablesOnStat):
     def callit(self, options, tree):
         tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
 
-        idx = tree[self.idx_name]
         diffs = []
 
         for tree['NUM'] in xrange(1, tree['NRUNS']+1):
             tree['TIME_FILENAME'] = '%(TIMEFILENAME_PATTERN)s' % tree % tree
 
+            idx = tree[self.idx_name]
+
             data = open(tree['TIME_FILENAME']).readlines()
 
             if len(data) <= idx: continue
+
+            if 'Command exited' in data[0]:
+                idx += 1
+                if len(data) <= idx: continue
+
             if self.pattern not in data[idx]: continue
 
             diff = float(data[idx].split()[-1][:-1]) / 100
@@ -281,12 +294,19 @@ class Efficiency(Stat):
         for tree['NUM'] in xrange(1, options.nruns+1):
             tree['TIME_FILENAME'] = options.timefilename_pattern % tree
 
+            idx = self.idx
+
             data = open(tree['TIME_FILENAME']).readlines()
 
-            if len(data) <= self.idx: continue
-            if self.pattern not in data[self.idx]: continue
+            if len(data) <= idx: continue
 
-            diff = float(data[self.idx].split()[-1][:-1]) / tree["CORESIZE"] * 1/100
+            if 'Command exited' in data[0]:
+                idx += 1
+                if len(data) <= idx: continue
+
+            if self.pattern not in data[idx]: continue
+
+            diff = float(data[idx].split()[-1][:-1]) / tree["CORESIZE"] * 1/100
             diffs.append(diff)
 
         if len(diffs) > 0:
@@ -380,6 +400,11 @@ class ElapsedTime(Stat):
                     data_time = open(tree['TIME_FILENAME']).readlines()
 
                     if len(data_time) <= idx_time: continue
+
+                    if 'Command exited' in data_time[0]:
+                        idx_time += 1
+                        if len(data_time) <= idx_time: continue
+
                     if 'Elapsed (wall clock) time' not in data_time[idx_time]: continue
 
                     global_time = data_time[idx_time].split()[-1][:-1].split(':')
@@ -437,6 +462,11 @@ class VariablesOnElapsedTime(VariablesOnStat):
                     data_time = open(tree['TIME_FILENAME']).readlines()
 
                     if len(data_time) <= idx_time: continue
+
+                    if 'Command exited' in data_time[0]:
+                        idx_time += 1
+                        if len(data_time) <= idx_time: continue
+
                     if 'Elapsed (wall clock) time' not in data_time[idx_time]: continue
 
                     global_time = data_time[idx_time].split()[-1][:-1].split(':')
@@ -512,6 +542,11 @@ class ElapsedTimeCommand(Stat):
                 data_time = open(tree['TIME_FILENAME']).readlines()
 
                 if len(data_time) <= idx_time: continue
+
+                if 'Command exited' in data_time[0]:
+                    idx_time += 1
+                    if len(data_time) <= idx_time: continue
+
                 if 'Elapsed (wall clock) time' not in data_time[idx_time]: continue
 
                 global_time = data_time[idx_time].split()[-1][:-1].split(':')
@@ -552,12 +587,13 @@ class VariablesOnElapsedTimeCommand(VariablesOnStat):
 
         tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
 
-        idx = tree[self.idx_name]
         times = []
 
         for tree['NUM'] in xrange(1, tree['NRUNS']+1):
             tree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % tree % tree
             tree['TIME_FILENAME'] = '%(TIMEFILENAME_PATTERN)s' % tree % tree
+
+            idx = tree[self.idx_name]
 
             global_time = None
 
@@ -566,6 +602,11 @@ class VariablesOnElapsedTimeCommand(VariablesOnStat):
                 data_time = open(tree['TIME_FILENAME']).readlines()
 
                 if len(data_time) <= idx_time: continue
+
+                if 'Command exited' in data_time[0]:
+                    idx_time += 1
+                    if len(data_time) <= idx_time: continue
+
                 if 'Elapsed (wall clock) time' not in data_time[idx_time]: continue
 
                 global_time = data_time[idx_time].split()[-1][:-1].split(':')
@@ -582,6 +623,9 @@ class VariablesOnElapsedTimeCommand(VariablesOnStat):
                 times.append(time/global_time)
             else:
                 times.append(time)
+
+        print 'len(times)', len(times)
+        print times
 
         if len(times) > 0:
             self.tracer.add(times)
