@@ -357,8 +357,9 @@ class VariablesOnAbsoluteTimeProportionsPerCores(VariablesOnTracer):
 
                     axes.append(ax)
 
-                max_bound = max([ax.get_ybound() for ax in axes])
-                for ax in axes: ax.set_ybound(max_bound)
+                min_bound = min([ax.get_ybound()[0] for ax in axes])
+                max_bound = max([ax.get_ybound()[1] for ax in axes])
+                for ax in axes: ax.set_ybound(min_bound, max_bound)
 
                 if not tree['PLOT_ON_WINDOW']:
                     tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
@@ -393,6 +394,15 @@ class VariablesOnGlobalAbsoluteTime(VariablesOnAbsoluteTimeProportions):
     def __init__(self, parser, title=None, xlabel=None, ylabel=None):
         VariablesOnAbsoluteTimeProportions.__init__(self, parser, ratetimes=['Global_elapsed_rate_time'],
                                                     title=title, xlabel=xlabel, ylabel=ylabel)
+
+class VariablesOnOperatorsTimeProportionsPerCores(VariablesOnAbsoluteTimeProportionsPerCores):
+    def __init__(self, parser, title=None, xlabel=None, ylabel=None):
+        VariablesOnAbsoluteTimeProportionsPerCores.__init__(self, parser,
+                                                            ratetimes=['Evaluation_elapsed_rate_time',
+                                                                       'Replace_elapsed_rate_time',
+                                                                       'Variation_elapsed_rate_time'],
+                                                            title=title, xlabel=xlabel, ylabel=ylabel
+                                                            )
 
 class VariablesOnGlobalAbsoluteTimePerCores(VariablesOnAbsoluteTimeProportionsPerCores):
     def __init__(self, parser, title=None, xlabel=None, ylabel=None):

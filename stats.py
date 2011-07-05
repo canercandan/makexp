@@ -47,6 +47,8 @@ class AgregatedFitness(Stat):
         self.pattern = pattern
 
     def callit(self, options, tree):
+        if not options.plot: return
+
         tree['MANGLENAME'] = options.manglename_pattern % tree
         tree['NUM'] = ''
         tree['PLAN_FILENAME'] = options.planfilename_pattern % tree
@@ -81,6 +83,8 @@ class VariablesOnAgregatedFitness(VariablesOnStat):
         self.title = title
 
     def callit(self, options, tree):
+        if not tree['PLOT']: return
+
         tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
         tree['NUM'] = ''
         tree['PLAN_FILENAME'] = '%(PLANFILENAME_PATTERN)s' % tree % tree
@@ -131,6 +135,8 @@ class Fitness(Stat):
         self.pattern = pattern
 
     def callit(self, options, tree):
+        if not options.plot: return
+
         tree['MANGLENAME'] = options.manglename_pattern % tree
         tree['NUM'] = ''
         tree['PLAN_FILENAME'] = options.planfilename_pattern % tree
@@ -166,6 +172,8 @@ class VariablesOnFitness(VariablesOnStat):
         self.title = title
 
     def callit(self, options, tree):
+        if not tree['PLOT']: return
+
         tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
         tree['NUM'] = ''
         tree['PLAN_FILENAME'] = '%(PLANFILENAME_PATTERN)s' % tree % tree
@@ -216,6 +224,8 @@ class SpeedUp(Stat):
         self.pattern = pattern
 
     def callit(self, options, tree):
+        if not options.plot: return
+
         tree['MANGLENAME'] = options.manglename_pattern % tree
 
         diffs = []
@@ -252,6 +262,8 @@ class VariablesOnSpeedUp(VariablesOnStat):
         self.title = 'Speedup'
 
     def callit(self, options, tree):
+        if not tree['PLOT']: return
+
         tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
 
         diffs = []
@@ -287,6 +299,8 @@ class Efficiency(Stat):
         self.pattern = pattern
 
     def callit(self, options, tree):
+        if not options.plot: return
+
         tree['MANGLENAME'] = options.manglename_pattern % tree
 
         diffs = []
@@ -323,6 +337,8 @@ class VariablesOnEfficiency(VariablesOnStat):
         self.title = 'Efficiency'
 
     def callit(self, options, tree):
+        if not tree['PLOT']: return
+
         tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
 
         diffs = []
@@ -375,6 +391,8 @@ class ElapsedTime(Stat):
         self.rate = rate
 
     def callit(self, options, tree):
+        if not options.plot: return
+
         tree['MANGLENAME'] = options.manglename_pattern % tree
 
         times = []
@@ -436,6 +454,8 @@ class VariablesOnElapsedTime(VariablesOnStat):
         self.rate = rate
 
     def callit(self, options, tree):
+        if not tree['PLOT']: return
+
         tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
 
         idx = tree[self.idx_name]
@@ -527,6 +547,8 @@ class ElapsedTimeCommand(Stat):
         - the time file provides the elapsed time (wall clock) got through the command time
         """
 
+        if not options.plot: return
+
         tree['MANGLENAME'] = options.manglename_pattern % tree
 
         times = []
@@ -585,6 +607,8 @@ class VariablesOnElapsedTimeCommand(VariablesOnStat):
         - the time file provides the elapsed time (wall clock) got through the command time
         """
 
+        if not tree['PLOT']: return
+
         tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
 
         times = []
@@ -623,9 +647,6 @@ class VariablesOnElapsedTimeCommand(VariablesOnStat):
                 times.append(time/global_time)
             else:
                 times.append(time)
-
-        print 'len(times)', len(times)
-        print times
 
         if len(times) > 0:
             self.tracer.add(times)
