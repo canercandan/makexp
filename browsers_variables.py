@@ -26,9 +26,9 @@ import optparse, logging, sys, os, subprocess, shutil
 from datetime import datetime
 import common
 import browsers
-from browsers import Sample, Pop, Core, Sequential, Restart, Starting, Dynamic, Schema, Command, Range, Execute, Dummy
+from browsers import Browser, Sample, Pop, Core, Sequential, Restart, Starting, Dynamic, Schema, Command, Range, Execute, Dummy
 
-class Do(browsers.Browser):
+class Do(Browser):
     """
     Main class to call in passing in argument the parser
     and a browser class.
