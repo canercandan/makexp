@@ -339,4 +339,52 @@ class ElapsedTimeCommand(Stat):
 
 class GlobalTime(ElapsedTimeCommand):
     def __init__(self, parser, tracer):
-        ElapsedTimeCommand.__init__(self, parser, tracer, 'GLOBAL_TIME_IDX', 'Elapsed time', title='Global elapsed rate time')
+        ElapsedTimeCommand.__init__(self, parser, tracer, idx_name='GLOBAL_TIME_IDX', pattern='Elapsed time', title='Global elapsed rate time')
+
+class ResultsSpeedup(Stat):
+    """
+    Generate some values for speedup based on the sequential execution results.
+    """
+
+    def __init__(self, parser, tracer, idx_name='GLOBAL_TIME_IDX', pattern='Elapsed time', title="Results Speedup"):
+        Stat.__init__(self, parser, tracer)
+
+        self.idx_name = idx_name
+        self.pattern = pattern
+        self.title = title
+
+    def callit(self, options, tree):
+        if not tree['PLOT']: return
+
+        tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
+
+        times = []
+
+        for tree['NUM'] in xrange(1, tree['NRUNS']+1):
+            seqtree = tree.copy()
+
+            tree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % tree % tree
+
+            seqtree['CORESIZE'] = 1
+            seqtree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % seqtree % seqtree
+            seqtree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % seqtree % seqtree
+
+            idx = tree[self.idx_name]
+
+            data = open(tree['RES_FILENAME']).readlines()
+            seqdata = open(seqtree['RES_FILENAME']).readlines()
+
+            if len(data) <= idx: continue
+            if self.pattern not in data[idx]: continue
+
+            if len(seqdata) <= idx: continue
+            if self.pattern not in seqdata[idx]: continue
+
+            seqtime = float(seqdata[idx].split()[-1][:-1])
+            partime = float(data[idx].split()[-1][:-1])
+            times.append(seqtime / partime)
+
+        if len(times) > 0:
+            self.tracer.add(times)
+            tree['TITLE'] = self.title.replace(' ', '_')
+            open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.time' % tree, 'w').write(str(times))
