@@ -410,6 +410,12 @@ class VariablesOnGlobalAbsoluteTimePerCores(VariablesOnAbsoluteTimeProportionsPe
                                                             title=title, xlabel=xlabel, ylabel=ylabel)
 
 class VariablesOnGlobalTimeSpeedup(VariablesOnTracer):
+    """
+    To compare and plot the speedup between the resultats of two experiences.
+
+    Usage: <SCRIPT> -t PATH/TO/NEW/EXPERIENCE -O PATH/TO/OLD/EXPERIENCE
+    """
+
     def __init__(self, parser):
         VariablesOnTracer.__init__(self, parser)
 
@@ -615,6 +621,8 @@ class VariablesOnGlobalEfficiency(VariablesOnTracer):
 class VariablesOnMultiInstance(VariablesOnTracer):
     """
     A high level tracer for multiple boxplots in order to compare several data having commons parameters.
+
+    This class is generic, please refer to derivated class for more details.
     """
 
     def __init__(self, parser, title, keysA=('CORESIZE', 'CORESIZES'), keysB=('POPSIZE', 'POPSIZES'), xlabel=None, ylabel=None, xbound=None, ybound=None):
@@ -687,6 +695,10 @@ class VariablesOnMultiInstance(VariablesOnTracer):
             pl.show()
 
 class VariablesOnMultiInstancePerPops(VariablesOnMultiInstance):
+    """
+    Generical class for experiences varying the population sizes.
+    """
+
     def __init__(self, parser, title, ylabel=None, xbound=None, ybound=None):
         VariablesOnMultiInstance.__init__(self, parser, title=title, keysA=('CORESIZE', 'CORESIZES'), keysB=('POPSIZE', 'POPSIZES'), xlabel='# populations', ylabel=ylabel, xbound=xbound, ybound=ybound)
 
@@ -699,6 +711,10 @@ class VariablesOnEfficiencyMultiInstancesPerPops(VariablesOnMultiInstancePerPops
         VariablesOnMultiInstancePerPops.__init__(self, parser, title='Efficiency', ylabel=ylabel, xbound=xbound, ybound=ybound)
 
 class VariablesOnMultiInstancePerCores(VariablesOnMultiInstance):
+    """
+    Generical class for experiences varying the number of cores.
+    """
+
     def __init__(self, parser, title, ylabel=None, xbound=None, ybound=None):
         VariablesOnMultiInstance.__init__(self, parser, title=title, keysA=('POPSIZE', 'POPSIZES'), keysB=('CORESIZE', 'CORESIZES'), xlabel='# cores', ylabel=ylabel, xbound=xbound, ybound=ybound)
 
