@@ -579,3 +579,11 @@ class SpeedupMultiInstancesPerCores(MultiInstancePerCores):
 class EfficiencyMultiInstancesPerCores(MultiInstancePerCores):
     def __init__(self, parser, ylabel=None, xbound=None, ybound=None):
         MultiInstancePerCores.__init__(self, parser, title='Efficiency', ylabel=ylabel, xbound=xbound, ybound=ybound)
+
+class ResultsSpeedupMultiInstancesPerCores(MultiInstancePerCores):
+    def __init__(self, parser, ylabel=None, xbound=None, ybound=None):
+        MultiInstancePerCores.__init__(self, parser, title='Results_Speedup', ylabel=ylabel, xbound=xbound, ybound=ybound)
+
+class ResultsEfficiencyMultiInstancesPerCores(MultiInstancePerCores):
+    def __init__(self, parser, ylabel=None, xbound=None, ybound=None):
+        MultiInstancePerCores.__init__(self, parser, title='Results_Efficiency', ylabel=ylabel, xbound=xbound, ybound=ybound)
