@@ -57,7 +57,11 @@ class Browser(common.Base):
     def add(self, browser):
         """
         Useful if you want to link several calls to add method. The return instance is the new added browser in order to add the next browser into this last.
-        Example: browser.add(browser1).add(browser2).add(browser3)...
+        cf. browser.add(browser1).add(browser2).add(browser3)...
+        is equal to:
+        - browser .add(browser1)
+        - browser1.add(browser2)
+        - browser2.add(browser3)
         """
 
         assert browser != None
@@ -67,7 +71,11 @@ class Browser(common.Base):
     def addC(self, browser):
         """
         Useful if you want to link several calls to add method together but in using the same instance
-        Example: browser.addC(browser1).addC(browser2).addC(browser3)...
+        cf. browser.addC(browser1).addC(browser2).addC(browser3)...
+        is equal to:
+        - browser.add(browser1)
+        - browser.add(browser2)
+        - browser.add(browser3)
         """
 
         assert browser != None
