@@ -357,22 +357,18 @@ class ResultsSpeedup(Stat):
         if not tree['PLOT']: return
 
         tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
+        tree['SEQ_MANGLENAME'] = '%(SEQ_MANGLENAME_PATTERN)s' % tree % tree
 
         times = []
 
         for tree['NUM'] in xrange(1, tree['NRUNS']+1):
-            seqtree = tree.copy()
-
             tree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % tree % tree
-
-            seqtree['CORESIZE'] = 1
-            seqtree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % seqtree % seqtree
-            seqtree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % seqtree % seqtree
+            tree['SEQ_RES_FILENAME'] = '%(SEQ_RESFILENAME_PATTERN)s' % tree % tree
 
             idx = tree[self.idx_name]
 
             data = open(tree['RES_FILENAME']).readlines()
-            seqdata = open(seqtree['RES_FILENAME']).readlines()
+            seqdata = open(tree['SEQ_RES_FILENAME']).readlines()
 
             if len(data) <= idx: continue
             if self.pattern not in data[idx]: continue
@@ -382,9 +378,55 @@ class ResultsSpeedup(Stat):
 
             seqtime = float(seqdata[idx].split()[-1][:-1])
             partime = float(data[idx].split()[-1][:-1])
+            # print seqtime, partime, seqtime / partime, tree['CORESIZE'], tree['NAME']
             times.append(seqtime / partime)
 
         if len(times) > 0:
             self.tracer.add(times)
             tree['TITLE'] = self.title.replace(' ', '_')
-            open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.time' % tree, 'w').write(str(times))
+            open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data' % tree, 'w').write(str(times))
+
+class ResultsEfficiency(Stat):
+    """
+    Generate some values for efficiency based on the sequential execution results.
+    """
+
+    def __init__(self, parser, tracer, idx_name='GLOBAL_TIME_IDX', pattern='Elapsed time', title="Results Efficiency"):
+        Stat.__init__(self, parser, tracer)
+
+        self.idx_name = idx_name
+        self.pattern = pattern
+        self.title = title
+
+    def callit(self, options, tree):
+        if not tree['PLOT']: return
+
+        tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
+        tree['SEQ_MANGLENAME'] = '%(SEQ_MANGLENAME_PATTERN)s' % tree % tree
+
+        times = []
+
+        for tree['NUM'] in xrange(1, tree['NRUNS']+1):
+            tree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % tree % tree
+            tree['SEQ_RES_FILENAME'] = '%(SEQ_RESFILENAME_PATTERN)s' % tree % tree
+
+            idx = tree[self.idx_name]
+
+            data = open(tree['RES_FILENAME']).readlines()
+            seqdata = open(tree['SEQ_RES_FILENAME']).readlines()
+
+            if len(data) <= idx: continue
+            if self.pattern not in data[idx]: continue
+
+            if len(seqdata) <= idx: continue
+            if self.pattern not in seqdata[idx]: continue
+
+            seqtime = float(seqdata[idx].split()[-1][:-1])
+            partime = float(data[idx].split()[-1][:-1])
+            #print seqtime, partime, seqtime / (partime * tree['CORESIZE']), tree['CORESIZE'], tree['NAME']
+            times.append(seqtime / (partime * tree['CORESIZE']))
+
+        if len(times) > 0:
+            self.tracer.add(times)
+            tree['TITLE'] = self.title.replace(' ', '_')
+            open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data' % tree, 'w').write(str(times))
