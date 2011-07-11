@@ -240,15 +240,13 @@ class ProgressBar(Browser):
         self.pos = 0
 
     def browse(self, options, tree):
-        assert 'PROGRESSBAR_SIZE' in tree
-
-        #print 'PROGRESSBAR_SIZE: %(PROGRESSBAR_SIZE)s' % tree
-
         self.pos += 1
         tree['PROGRESSBAR_POSITION'] = float(self.pos) / float(tree['PROGRESSBAR_SIZE']) * 100
-        tree['PROGRESSBAR_VISUAL'] = '[%s%s]' % ('=' * int(tree['PROGRESSBAR_POSITION']), ' ' * (100 - int(tree['PROGRESSBAR_POSITION'])))
+        tree['PROGRESSBAR_DONECHARS'] = '=' * (int(tree['PROGRESSBAR_POSITION']) / 2)
+        tree['PROGRESSBAR_TODOCHARS'] = ' ' * ((100 - int(tree['PROGRESSBAR_POSITION'])) / 2)
+        tree['PROGRESSBAR_VISUAL'] = '%(PROGRESSBAR_DONECHARS)s%(PROGRESSBAR_TODOCHARS)s' % tree
 
-        print '\rMAKexp: %(PROGRESSBAR_VISUAL)s %(PROGRESSBAR_POSITION)d %%' % tree,
+        print '\rMAKexp:\t%(PROGRESSBAR_VISUAL)s\t%(PROGRESSBAR_POSITION)d %%' % tree,
 
         self.browseAll(tree)
 
