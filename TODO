@@ -1,2 +1,3 @@
 - add sequential execution to options based interface
 - to have an hierarcy in global tracer classes as in browsers classes
+- 'Execute' derivated class working with 'Grid Engine' (qsub) in order to send jobs to the cluster
