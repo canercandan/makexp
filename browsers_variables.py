@@ -26,7 +26,7 @@ import optparse, logging, sys, os, subprocess, shutil
 from datetime import datetime
 import common
 import browsers
-from browsers import Browser, Sample, Pop, Core, Sequential, Restart, Starting, Dynamic, Schema, Command, Range, Execute, Dummy
+from browsers import Browser, Sample, Pop, Core, Sequential, Restart, Starting, Dynamic, Schema, Command, Range, Execute, ProgressBar, Dummy
 
 class Do(Browser):
     """
@@ -118,6 +118,8 @@ class Do(Browser):
                 'REPLACE_TIME_IDX': 22,
                 'GLOBAL_TIME_IDX': 23,
                 'TIME_IDX': 4,
+
+                'PROGRESSBAR_SIZE': 1,
                 }
             t.update(d)
 

@@ -114,6 +114,8 @@ class Sample(Browser):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
+        tree['PROGRESSBAR_SIZE'] *= len(tree['SAMPLES'])
+
         for tree['NAME'], tree['DOMAIN'], tree['INSTANCE'] in tree['SAMPLES']:
             self.browseAll(tree)
 
@@ -122,6 +124,8 @@ class Pop(Browser):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
+        tree['PROGRESSBAR_SIZE'] *= len(tree['POPSIZES'])
+
         for tree['POPSIZE'] in tree['POPSIZES']:
             self.browseAll(tree)
 
@@ -130,6 +134,8 @@ class Core(Browser):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
+        tree['PROGRESSBAR_SIZE'] *= len(tree['CORESIZES']) * 2  # temporary patch, taking in account the sequential execution, has to be changed
+
         for tree['CORESIZE'] in tree['CORESIZES']:
             self.browseAll(tree)
 
@@ -138,6 +144,8 @@ class Sequential(Browser):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
+        tree['PROGRESSBAR_SIZE'] *= 2
+
         tree['CORESIZE'] = 1
         tree['PARALLELIZE'] = False
 
@@ -158,6 +166,8 @@ class Starting(Browser):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
+        tree['PROGRESSBAR_SIZE'] *= 2
+
         for tree['FIELD'], tree['RUNMAX'] in [('', 1), ('RESTART', 0)]:
             self.browseAll(tree)
 
@@ -176,6 +186,8 @@ class Schema(Browser):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
+        tree['PROGRESSBAR_SIZE'] *= 2
+
         for tree['SCHEMA'], tree['SCHEMABOOL'] in [('STATIC', 0), ('DYNAMIC', 1)]:
             self.browseAll(tree)
 
@@ -184,6 +196,8 @@ class Command(Browser):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
+        tree['PROGRESSBAR_SIZE'] *= len(tree['BINARIES'])
+
         for tree['COMMAND'] in tree['BINARIES']:
             if tree['EXECUTE']:
                 shutil.copy2('%(BINARYPATH)s/%(COMMAND)s' % tree, '%(MAKEXPDIR)s/' % tree)
@@ -195,6 +209,8 @@ class Range(Browser):
         Browser.__init__(self, parser, browser)
 
     def browse(self, options, tree):
+        tree['PROGRESSBAR_SIZE'] *= tree['NRUNS']
+
         for tree['NUM'] in xrange(1, tree['NRUNS']+1):
             self.browseAll(tree)
 
@@ -215,8 +231,30 @@ class Execute(Browser):
             p = subprocess.Popen('%(PROCESS_COMMAND)s' % tree, shell=True)
             p.wait()
 
+        self.browseAll(tree)
+
+class ProgressBar(Browser):
+    def __init__(self, parser, stat=None):
+        Browser.__init__(self, parser, stat=stat)
+
+        self.pos = 0
+
+    def browse(self, options, tree):
+        assert 'PROGRESSBAR_SIZE' in tree
+
+        #print 'PROGRESSBAR_SIZE: %(PROGRESSBAR_SIZE)s' % tree
+
+        self.pos += 1
+        tree['PROGRESSBAR_POSITION'] = float(self.pos) / float(tree['PROGRESSBAR_SIZE']) * 100
+        tree['PROGRESSBAR_VISUAL'] = '[%s%s]' % ('=' * int(tree['PROGRESSBAR_POSITION']), ' ' * (100 - int(tree['PROGRESSBAR_POSITION'])))
+
+        print '\rMAKexp: %(PROGRESSBAR_VISUAL)s %(PROGRESSBAR_POSITION)d %%' % tree,
+
+        self.browseAll(tree)
+
 class Dummy(Browser):
     def __init__(self, parser):
         Browser.__init__(self, parser)
 
-    def browse(self, options, tree): pass
+    def browse(self, options, tree):
+        self.browseAll(tree)
