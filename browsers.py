@@ -158,6 +158,7 @@ class Restart(Browser):
     def browse(self, options, tree):
         tree['FIELD'] = 'RESTART' if tree['RESTART'] else ''
         tree['RUNMAX'] = 0 if tree['RESTART'] else 1
+        tree['TIMELIMIT_COMMAND'] = '%(TIMELIMIT_COMMAND_PATTERN)s' % tree % tree if tree['RESTART'] else ''
 
         self.browseAll(tree)
 
@@ -168,7 +169,10 @@ class Starting(Browser):
     def browse(self, options, tree):
         tree['PROGRESSBAR_SIZE'] *= 2
 
-        for tree['FIELD'], tree['RUNMAX'] in [('', 1), ('RESTART', 0)]:
+        for tree['FIELD'], tree['RUNMAX'], tree['TIMELIMIT_COMMAND'] in [
+            ('', 1, ''),
+            ('RESTART', 0, '%(TIMELIMIT_COMMAND_PATTERN)s' % tree % tree)
+            ]:
             self.browseAll(tree)
 
 class Dynamic(Browser):

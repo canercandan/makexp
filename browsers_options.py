@@ -40,9 +40,10 @@ class Do(browser.Browser):
                  timefilename_pattern='%(TIMEDIR)s/%(NAME)s_%(MANGLENAME)s.time.%(NUM)s',
                  resfilename_pattern='%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.out.%(NUM)s',
                  planfilename_pattern='%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.soln.%(NUM)s',
+                 timelimit_command_pattern='timelimit -t %(TIMELIMIT)d',
                  command_pattern=\
                      '/usr/bin/time -v -o %(TIME_FILENAME)s '\
-                     'timelimit -t %(TIMELIMIT)d '\
+                     '%(TIMELIMIT_COMMAND)s '\
                      '%(MAKEXPDIR)s/%(COMMAND)s '\
                      '--seed=%(SEED)d '\
                      '--domain=%(DOMAIN)s '\
@@ -167,6 +168,7 @@ class Restart(browsers.Restart):
 
     def browse(self, options, tree):
         tree['RESTART'] = options.restart
+        tree['TIMELIMIT_COMMAND_PATTERN'] = options.timelimit_command_pattern
         browsers.Restart.browse(self, options, tree)
 
 class Starting(browsers.Starting):
@@ -174,6 +176,7 @@ class Starting(browsers.Starting):
         browsers.Starting.__init__(self, parser, browser)
 
     def browse(self, options, tree):
+        tree['TIMELIMIT_COMMAND_PATTERN'] = options.timelimit_command_pattern
         browsers.Starting.browse(self, options, browser)
 
 class Dynamic(browsers.Dynamic):

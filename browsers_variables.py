@@ -62,9 +62,10 @@ class Do(Browser):
                 'RESFILENAME_PATTERN': '%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.out.%(NUM)s',
                 'SEQ_RESFILENAME_PATTERN': '%(RESDIR)s/%(NAME)s_%(SEQ_MANGLENAME)s.out.%(NUM)s',
                 'PLANFILENAME_PATTERN': '%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.soln.%(NUM)s',
+                'TIMELIMIT_COMMAND_PATTERN': 'timelimit -t %(TIMELIMIT)d',
                 'COMMAND_PATTERN':\
                     '/usr/bin/time -v -o %(TIME_FILENAME)s '\
-                    'timelimit -t %(TIMELIMIT)d '\
+                    '%(TIMELIMIT_COMMAND)s '\
                     '%(MAKEXPDIR)s/%(COMMAND)s '\
                     '--seed=%(SEED)d '\
                     '--domain=%(DOMAIN)s '\
