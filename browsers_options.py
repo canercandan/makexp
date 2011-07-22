@@ -51,10 +51,15 @@ class Do(browser.Browser):
                      '--plan-file=%(PLAN_FILENAME)s '\
                      '--runs-max=%(RUNMAX)d '\
                      '--popSize=%(POPSIZE)d '\
+                     '--gen-min=%(GENMIN)d '\
                      '--gen-steady=%(GENSTEADY)d '\
+                     '--gen-max=%(GENMAX)d '\
                      '--parallelize-loop=%(PARALLELIZE)d '\
                      '--parallelize-nthreads=%(CORESIZE)d '\
                      '--parallelize-dynamic=%(SCHEMABOOL)d '\
+                     '--parallelize-enable-results=1 '\
+                     '--parallelize-prefix=%(RES_FILENAME)s ' \
+                     '--status=%(RES_FILENAME)s.status ' \
                      '> %(RES_FILENAME)s',
                  description='No description\n'):
 
@@ -220,12 +225,14 @@ class Range(browsers.Range):
         browsers.Range.browse(self, options, tree)
 
 class Execute(browsers.Execute):
-    def __init__(self, parser, seed=0, runmax=0, gensteady=50, timelimit=1800, stat=None):
+    def __init__(self, parser, seed=0, runmax=0, genmin=10, gensteady=50, genmax=1000, timelimit=1800, stat=None):
         browsers.Execute.__init__(self, parser, stat=stat)
 
         parser.add_option('-s', '--seed', type='int', default=seed, help='with seed fixed, seed=0 means seed defined randomly')
         parser.add_option('-M', '--runmax', type='int', default=runmax, help='with runmax fixed, runmax=0 means no limit')
+        parser.add_option(None, '--genmin', type='int', default=genmin, help='with genmin fixed')
         parser.add_option('-G', '--gensteady', type='int', default=gensteady, help='with gensteady fixed')
+        parser.add_option(None, '--genmax', type='int', default=genmax, help='with genmax fixed')
         parser.add_option('-T', '--timelimit', type='int', default=timelimit, help='with timelimit fixed')
 
     def browse(self, options, tree):
@@ -237,7 +244,9 @@ class Execute(browsers.Execute):
 
         if options.runmax: tree['RUNMAX'] = options.runmax
         tree['SEED'] = options.seed
+        tree['GENMIN'] = options.genmin
         tree['GENSTEADY'] = options.gensteady
+        tree['GENMAX'] = options.genmax
         tree['TIMELIMIT'] = options.timelimit
         tree['EXECUTE'] = options.execute
 

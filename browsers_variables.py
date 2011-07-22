@@ -73,10 +73,15 @@ class Do(Browser):
                     '--plan-file=%(PLAN_FILENAME)s '\
                     '--runs-max=%(RUNMAX)d '\
                     '--popSize=%(POPSIZE)d '\
+                    '--gen-min=%(GENMIN)d '\
                     '--gen-steady=%(GENSTEADY)d '\
+                    '--gen-max=%(GENMAX)d '\
                     '--parallelize-loop=%(PARALLELIZE)d '\
                     '--parallelize-nthreads=%(CORESIZE)d '\
                     '--parallelize-dynamic=%(SCHEMABOOL)d '\
+                    '--parallelize-enable-results=1 '\
+                    '--parallelize-prefix=%(RES_FILENAME)s ' \
+                    '--status=%(RES_FILENAME)s.status '\
                     '> %(RES_FILENAME)s',
 
                 'RESDIR_PATTERN': '%(TOPIC)s/Res',
@@ -98,7 +103,9 @@ class Do(Browser):
                 'PARALLELIZE': True,
                 'SEED': 0,
                 'RUNMAX': 0,
+                'GENMIN': 10,
                 'GENSTEADY': 50,
+                'GENMAX': 1000,
                 'TIMELIMIT': 1800,
 
                 'TITLE': None,
