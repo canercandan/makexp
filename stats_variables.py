@@ -423,7 +423,12 @@ class ResultsEfficiency(Stat):
 
             seqtime = float(seqdata[idx].split()[-1][:-1])
             partime = float(data[idx].split()[-1][:-1])
-            #print seqtime, partime, seqtime / (partime * tree['CORESIZE']), tree['CORESIZE'], tree['NAME']
+
+            # if ( seqtime / (partime * tree['CORESIZE']) ) > 1:
+            #     print seqtime, partime, seqtime / (partime * tree['CORESIZE']), tree['CORESIZE'], tree['NAME']
+
+            print seqtime, partime, seqtime / (partime * tree['CORESIZE']), tree['CORESIZE'], tree['NAME']
+
             times.append(seqtime / (partime * tree['CORESIZE']))
 
         if len(times) > 0:
