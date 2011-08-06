@@ -113,7 +113,12 @@ class Do(browser.Browser):
             for key in ['RESDIR', 'TIMEDIR', 'MAKEXPDIR']: makedirs(tree[key])
             dirname = os.path.dirname(sys.argv[0])
             script = os.path.basename(sys.argv[0])
-            for f in [script, 'browsers.py', 'common.py', 'stats.py', 'tracers.py']:
+            for f in [script,
+                      'browsers.py', 'browsers_options.py', 'browsers_variables.py',
+                      'stats.py', 'stats_options.py', 'stats_variables.py',
+                      'tracers.py', 'tracers_options.py', 'tracers_variables.py',
+                      'common.py',
+                      ]:
                 shutil.copy2("%s/%s" % (dirname, f), "%(MAKEXPDIR)s/" % tree)
 
             open('%(TOPIC)s/COMMAND' % tree, 'w').write("%s\n" % ' '.join(sys.argv))
