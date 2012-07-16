@@ -246,8 +246,8 @@ class ProgressBar(Browser):
     def browse(self, options, tree):
         self.pos += 1
         tree['PROGRESSBAR_POSITION'] = (float(self.pos) / float(tree['PROGRESSBAR_SIZE']) * 100) % 100
-        tree['PROGRESSBAR_DONECHARS'] = '=' * (int(tree['PROGRESSBAR_POSITION']) / 2)
-        tree['PROGRESSBAR_TODOCHARS'] = ' ' * ((100 - int(tree['PROGRESSBAR_POSITION'])) / 2)
+        tree['PROGRESSBAR_DONECHARS'] = '=' * int(int(tree['PROGRESSBAR_POSITION']) / 2)
+        tree['PROGRESSBAR_TODOCHARS'] = ' ' * int((100 - int(tree['PROGRESSBAR_POSITION'])) / 2)
         tree['PROGRESSBAR_VISUAL'] = '%(PROGRESSBAR_DONECHARS)s%(PROGRESSBAR_TODOCHARS)s' % tree
 
         print('\rMAKexp:\t%(PROGRESSBAR_VISUAL)s\t%(PROGRESSBAR_POSITION)d %%' % tree, end=' ')
