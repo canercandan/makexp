@@ -16,67 +16,7 @@
 # Caner Candan <caner@candan.fr>, http://caner.candan.fr
 #
 
-"""
-How to use the program parsing and logging features ?
-
-(1) Add at the header of your program the following lines:
-
-import optparse, logging
-import common
-
-(2) Define a logging context:
-
-logger = logging.getLogger("YOUR_PROGRAM")
-
-(3) Define the options parser:
-
-options = common.parser()
-
-(3bis) You can also define your own options:
-
-parser = optparse.OptionParser()
-parser.add_option('-f', '--filename', help='give a filename')
-options = common.parser(parser)
-"""
-
-import optparse, logging, sys
-
-LEVELS = {'debug': logging.DEBUG,
-          'info': logging.INFO,
-          'warning': logging.WARNING,
-          'error': logging.ERROR,
-          'critical': logging.CRITICAL}
-
-def parser(parser=optparse.OptionParser()):
-    parser.add_option('-v', '--verbose', choices=list(LEVELS.keys()), default='info', help='set a verbose level')
-    parser.add_option('-l', '--levels', action='store_true', default=False, help='list verbose levels')
-    parser.add_option('-o', '--output', help='give an output filename for logging', default='')
-
-    options, args = parser.parse_args()
-    if options.levels: list_verbose_levels()
-    logger(options.verbose, options.output)
-    return options
-
-def logger(level_name, filename=''):
-    if (filename != ''):
-        logging.basicConfig(
-            level=logging.DEBUG,
-            format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-            filename=filename, filemode='a'
-            )
-        return
-
-    logging.basicConfig(
-        level=LEVELS.get(level_name, logging.NOTSET),
-        format='%(name)-12s: %(levelname)-8s %(message)s'
-        )
-
-def list_verbose_levels():
-    print("Here's the verbose levels available:")
-    for keys in list(LEVELS.keys()):
-        print("\t", keys)
-    sys.exit()
-
+import logging
 
 from collections import UserDict
 class AutoFillingDict(UserDict):

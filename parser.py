@@ -1,3 +1,44 @@
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2
+# as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# Authors:
+# Caner Candan <caner@candan.fr>, http://caner.candan.fr
+#
+
+"""
+How to use the program parsing and logging features ?
+
+(1) Add at the header of your program the following lines:
+
+import parser as p, logging
+
+(2) Define a logging context:
+
+logger = logging.getLogger("YOUR_PROGRAM")
+
+(3) Define the options parser:
+
+parser = p.Parser()
+options = parser()
+
+(3bis) You can also define your own options:
+
+parser = p.Parser()
+parser.add_option('-f', '--filename', help='give a filename')
+options = parser()
+"""
+
 import optparse, logging, sys
 
 class Parser(optparse.OptionParser):
