@@ -48,7 +48,7 @@ LEVELS = {'debug': logging.DEBUG,
           'critical': logging.CRITICAL}
 
 def parser(parser=optparse.OptionParser()):
-    parser.add_option('-v', '--verbose', choices=LEVELS.keys(), default='info', help='set a verbose level')
+    parser.add_option('-v', '--verbose', choices=list(LEVELS.keys()), default='info', help='set a verbose level')
     parser.add_option('-l', '--levels', action='store_true', default=False, help='list verbose levels')
     parser.add_option('-o', '--output', help='give an output filename for logging', default='')
 
@@ -72,13 +72,13 @@ def logger(level_name, filename=''):
         )
 
 def list_verbose_levels():
-    print "Here's the verbose levels available:"
-    for keys in LEVELS.keys():
-        print "\t", keys
+    print("Here's the verbose levels available:")
+    for keys in list(LEVELS.keys()):
+        print("\t", keys)
     sys.exit()
 
 
-from UserDict import UserDict
+from collections import UserDict
 class AutoFillingDict(UserDict):
     """
     Another kind of dictionnary inheriting from UserDict and returning an empty string whether a key is not found.

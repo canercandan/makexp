@@ -215,7 +215,7 @@ class Range(Browser):
     def browse(self, options, tree):
         tree['PROGRESSBAR_SIZE'] *= tree['NRUNS']
 
-        for tree['NUM'] in xrange(1, tree['NRUNS']+1):
+        for tree['NUM'] in range(1, tree['NRUNS']+1):
             self.browseAll(tree)
 
 class Execute(Browser):
@@ -250,7 +250,7 @@ class ProgressBar(Browser):
         tree['PROGRESSBAR_TODOCHARS'] = ' ' * ((100 - int(tree['PROGRESSBAR_POSITION'])) / 2)
         tree['PROGRESSBAR_VISUAL'] = '%(PROGRESSBAR_DONECHARS)s%(PROGRESSBAR_TODOCHARS)s' % tree
 
-        print '\rMAKexp:\t%(PROGRESSBAR_VISUAL)s\t%(PROGRESSBAR_POSITION)d %%' % tree,
+        print('\rMAKexp:\t%(PROGRESSBAR_VISUAL)s\t%(PROGRESSBAR_POSITION)d %%' % tree, end=' ')
 
         self.browseAll(tree)
 

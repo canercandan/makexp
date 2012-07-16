@@ -130,7 +130,7 @@ class SpeedUp(Stat):
 
         diffs = []
 
-        for tree['NUM'] in xrange(1, tree['NRUNS']+1):
+        for tree['NUM'] in range(1, tree['NRUNS']+1):
             tree['TIME_FILENAME'] = '%(TIMEFILENAME_PATTERN)s' % tree % tree
 
             idx = tree[self.idx_name]
@@ -168,7 +168,7 @@ class Efficiency(Stat):
 
         diffs = []
 
-        for tree['NUM'] in xrange(1, tree['NRUNS']+1):
+        for tree['NUM'] in range(1, tree['NRUNS']+1):
             tree['TIME_FILENAME'] = '%(TIMEFILENAME_PATTERN)s' % tree % tree
 
             idx = tree[self.idx_name]
@@ -216,7 +216,7 @@ class ElapsedTime(Stat):
         idx = tree[self.idx_name]
         times = []
 
-        for tree['NUM'] in xrange(1, tree['NRUNS']+1):
+        for tree['NUM'] in range(1, tree['NRUNS']+1):
             tree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % tree % tree
 
             data = open(tree['RES_FILENAME']).readlines()
@@ -297,7 +297,7 @@ class ElapsedTimeCommand(Stat):
 
         times = []
 
-        for tree['NUM'] in xrange(1, tree['NRUNS']+1):
+        for tree['NUM'] in range(1, tree['NRUNS']+1):
             tree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % tree % tree
             tree['TIME_FILENAME'] = '%(TIMEFILENAME_PATTERN)s' % tree % tree
 
@@ -361,7 +361,7 @@ class ResultsSpeedup(Stat):
 
         times = []
 
-        for tree['NUM'] in xrange(1, tree['NRUNS']+1):
+        for tree['NUM'] in range(1, tree['NRUNS']+1):
             tree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % tree % tree
             tree['SEQ_RES_FILENAME'] = '%(SEQ_RESFILENAME_PATTERN)s' % tree % tree
 
@@ -406,7 +406,7 @@ class ResultsEfficiency(Stat):
 
         times = []
 
-        for tree['NUM'] in xrange(1, tree['NRUNS']+1):
+        for tree['NUM'] in range(1, tree['NRUNS']+1):
             tree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % tree % tree
             tree['SEQ_RES_FILENAME'] = '%(SEQ_RESFILENAME_PATTERN)s' % tree % tree
 
@@ -427,7 +427,7 @@ class ResultsEfficiency(Stat):
             # if ( seqtime / (partime * tree['CORESIZE']) ) > 1:
             #     print seqtime, partime, seqtime / (partime * tree['CORESIZE']), tree['CORESIZE'], tree['NAME']
 
-            print seqtime, partime, seqtime / (partime * tree['CORESIZE']), tree['CORESIZE'], tree['NAME']
+            print((seqtime, partime, seqtime / (partime * tree['CORESIZE']), tree['CORESIZE'], tree['NAME']))
 
             times.append(seqtime / (partime * tree['CORESIZE']))
 
