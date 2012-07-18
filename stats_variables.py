@@ -60,7 +60,7 @@ class AgregatedFitness(Stat):
         if len(fitnesses) > 0:
             self.tracer.add(fitnesses)
             tree['TITLE'] = self.title.replace(' ', '_')
-            open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data' % tree, 'w').write(str(fitnesses))
+            open('%(GRAPHFILENAME_PATTERN)s' % tree % tree, 'w').write(str(fitnesses))
 
 class AgregatedMakeSpan(AgregatedFitness):
     def __init__(self, parser, tracer):
@@ -105,7 +105,7 @@ class Fitness(Stat):
         if len(fitnesses) > 0:
             self.tracer.add(fitnesses)
             tree['TITLE'] = self.title.replace(' ', '_')
-            open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data' % tree, 'w').write(str(fitnesses))
+            open('%(GRAPHFILENAME_PATTERN)s' % tree % tree, 'w').write(str(fitnesses))
 
 class MakeSpan(Fitness):
     def __init__(self, parser, tracer):
@@ -151,7 +151,7 @@ class SpeedUp(Stat):
         if len(diffs) > 0:
             self.tracer.add(diffs)
             tree['TITLE'] = self.title.replace(' ', '_')
-            open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data' % tree, 'w').write(str(diffs))
+            open('%(GRAPHFILENAME_PATTERN)s' % tree % tree, 'w').write(str(diffs))
 
 class Efficiency(Stat):
     def __init__(self, parser, tracer, idx_name, pattern):
@@ -189,7 +189,7 @@ class Efficiency(Stat):
         if len(diffs) > 0:
             self.tracer.add(diffs)
             tree['TITLE'] = self.title.replace(' ', '_')
-            open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data' % tree, 'w').write(str(diffs))
+            open('%(GRAPHFILENAME_PATTERN)s' % tree % tree, 'w').write(str(diffs))
 
 class TimeSpeedUp(SpeedUp):
     def __init__(self, parser, tracer):
@@ -384,7 +384,7 @@ class ResultsSpeedup(Stat):
         if len(times) > 0:
             self.tracer.add(times)
             tree['TITLE'] = self.title.replace(' ', '_')
-            open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data' % tree, 'w').write(str(times))
+            open('%(GRAPHFILENAME_PATTERN)s' % tree % tree, 'w').write(str(times))
 
 class ResultsEfficiency(Stat):
     """
@@ -434,4 +434,4 @@ class ResultsEfficiency(Stat):
         if len(times) > 0:
             self.tracer.add(times)
             tree['TITLE'] = self.title.replace(' ', '_')
-            open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data' % tree, 'w').write(str(times))
+            open('%(GRAPHFILENAME_PATTERN)s' % tree % tree, 'w').write(str(times))

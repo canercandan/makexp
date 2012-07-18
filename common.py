@@ -39,9 +39,7 @@ class Base:
 
     def __init__(self, parser):
         self.parser = parser
-
-        name = str(str(self).split('.')[1].split()[0])
-        self.logger = logging.getLogger(name)
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def __call__(self, tree = AutoFillingDict()):
         self.logger.debug('begins')
