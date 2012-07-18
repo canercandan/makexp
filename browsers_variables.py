@@ -26,7 +26,7 @@ import optparse, logging, sys, os, subprocess, shutil
 from datetime import datetime
 import common
 import browsers
-from browsers import Browser, Sample, Pop, Core, Sequential, Restart, Starting, Dynamic, Schema, Command, Range, Execute, ProgressBar, Dummy
+from browsers import *
 
 class Do(Browser):
     """
@@ -60,8 +60,9 @@ class Do(Browser):
                 'SEQ_MANGLENAME_PATTERN': '%(FIELD)s_%(COMMAND)s_%(SCHEMA)s_S%(POPSIZE)d_C1',
                 'TIMEFILENAME_PATTERN': '%(TIMEDIR)s/%(NAME)s_%(MANGLENAME)s.time.%(NUM)s',
                 'RESFILENAME_PATTERN': '%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.out.%(NUM)s',
+                'STATFILENAME_PATTERN': '%(STATDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.stat',
+                'GRAPHFILENAME_PATTERN': '%(STATDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data',
                 'SEQ_RESFILENAME_PATTERN': '%(RESDIR)s/%(NAME)s_%(SEQ_MANGLENAME)s.out.%(NUM)s',
-                'PLANFILENAME_PATTERN': '%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.soln.%(NUM)s',
                 'TIMELIMIT_COMMAND_PATTERN': 'timelimit -t %(TIMELIMIT)d',
                 'COMMAND_PATTERN':\
                     '/usr/bin/time -v -o %(TIME_FILENAME)s '\
@@ -86,13 +87,16 @@ class Do(Browser):
 
                 'RESDIR_PATTERN': '%(TOPIC)s/Res',
                 'TIMEDIR_PATTERN': '%(TOPIC)s/Time',
+                'STATDIR_PATTERN': '%(TOPIC)s/Stat',
                 'MAKEXPDIR_PATTERN': '%(TOPIC)s/makexp_%(DATENAME)s',
                 'GRAPHDIR_PATTERN': '%(TOPIC)s/graph_%(DATENAME)s',
 
                 'SAMPLES': [],
                 'NRUNS': 1,
                 'POPSIZES': [],
+                'POPSIZE': 0,
                 'CORESIZES': [],
+                'CORESIZE': 0,
                 'BINARIES': [],
                 'BINARYPATH': '.',
                 'RESTART': False,
@@ -116,16 +120,7 @@ class Do(Browser):
                 'YBOUND': None,
                 'LEGEND': True,
                 'PROPERTIES': [],
-
-                'SPEEDUP_IDX': 3,
-                'EFFICIENCY_IDX': 3,
-                'MAKESPAN_IDX': 2,
-                'TOTALCOST_IDX': 3,
-                'EVALUATION_TIME_IDX': 20,
-                'VARIATION_TIME_IDX': 21,
-                'REPLACE_TIME_IDX': 22,
-                'GLOBAL_TIME_IDX': 23,
-                'TIME_IDX': 4,
+                'EXTENSIONS': ['pdf', 'png'],
 
                 'PROGRESSBAR_SIZE': 1,
                 }
@@ -134,12 +129,19 @@ class Do(Browser):
         def filltree(t):
             t['RESDIR'] = '%(RESDIR_PATTERN)s' % t % t
             t['TIMEDIR'] = '%(TIMEDIR_PATTERN)s' % t % t
+            t['STATDIR'] = '%(STATDIR_PATTERN)s' % t % t
             t['MAKEXPDIR'] = '%(MAKEXPDIR_PATTERN)s' % t % t
             t['GRAPHDIR'] = '%(GRAPHDIR_PATTERN)s' % t % t
 
         tree['TOPIC'] = options.topic
         tree['OTHER_TOPIC'] = options.other_topic
         tree['DATENAME'] = self.datename
+
+        if not os.path.isdir(tree['TOPIC']):
+            makedirs(tree['TOPIC'])
+            shutil.copy2('default_variables.py', '%(TOPIC)s/variables.py' % tree)
+            self.logger.info('the topic (directory) %(TOPIC)s was just created take your time to configure it and run it again.' % tree)
+            return
 
         inittree(tree)
         tree.update(eval(''.join(open('%(TOPIC)s/variables.py' % tree).readlines())))
@@ -154,21 +156,16 @@ class Do(Browser):
             otree.update(eval(''.join(open('%(TOPIC)s/variables.py' % otree).readlines())))
             filltree(otree)
 
-            otree['RESDIR'] = '%(RESDIR_PATTERN)s' % otree % otree
-            otree['TIMEDIR'] = '%(TIMEDIR_PATTERN)s' % otree % otree
-            otree['MAKEXPDIR'] = '%(MAKEXPDIR_PATTERN)s' % otree % otree
-            otree['GRAPHDIR'] = '%(GRAPHDIR_PATTERN)s' % otree % otree
-
         # create needed directories
         if tree['EXECUTE']:
-            for key in ['RESDIR', 'TIMEDIR', 'MAKEXPDIR']: makedirs(tree[key])
+            for key in ['RESDIR', 'TIMEDIR', 'STATDIR', 'MAKEXPDIR']: makedirs(tree[key])
             dirname = os.path.dirname(sys.argv[0])
             script = os.path.basename(sys.argv[0])
             for f in [script,
                       'browsers.py', 'browsers_options.py', 'browsers_variables.py',
                       'stats.py', 'stats_options.py', 'stats_variables.py',
                       'tracers.py', 'tracers_options.py', 'tracers_variables.py',
-                      'common.py',
+                      'common.py', 'parser.py'
                       ]:
                 shutil.copy2("%s/%s" % (dirname, f), "%(MAKEXPDIR)s/" % tree)
 
