@@ -116,7 +116,17 @@ class Sample(Browser):
     def browse(self, options, tree):
         tree['PROGRESSBAR_SIZE'] *= len(tree['SAMPLES'])
 
-        for tree['NAME'], tree['DOMAIN'], tree['INSTANCE'] in tree['SAMPLES']:
+        for tree['INSTANCE'] in tree['SAMPLES']:
+            self.browseAll(tree)
+
+class Generation(Browser):
+    def __init__(self, parser, browser=None):
+        Browser.__init__(self, parser, browser)
+
+    def browse(self, options, tree):
+        tree['PROGRESSBAR_SIZE'] *= len(tree['GENERATIONS'])
+
+        for tree['GENMAX'] in tree['GENERATIONS']:
             self.browseAll(tree)
 
 class Pop(Browser):
@@ -226,7 +236,6 @@ class Execute(Browser):
         tree['MANGLENAME'] = '%(MANGLENAME_PATTERN)s' % tree % tree
         tree['TIME_FILENAME'] = '%(TIMEFILENAME_PATTERN)s' % tree % tree
         tree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % tree % tree
-        tree['PLAN_FILENAME'] = '%(PLANFILENAME_PATTERN)s' % tree % tree
         tree['PROCESS_COMMAND'] = '%(COMMAND_PATTERN)s' % tree % tree
 
         self.logger.debug('%(PROCESS_COMMAND)s' % tree)
