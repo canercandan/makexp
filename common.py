@@ -30,7 +30,6 @@ class AutoFillingDict(UserDict):
 
     def __getitem__(self, key):
         return self.data.get(key, '')
-        #return UserDict.get(self, key, '')
 
 class Base:
     """
@@ -43,6 +42,6 @@ class Base:
 
     def __call__(self, tree = AutoFillingDict()):
         self.logger.debug('begins')
-        options, args = self.parser.parse_args()
-        if options.topic: self.callit(options, tree.copy())
+        options = self.parser()
+        if options.workdir: self.callit(options, tree.copy())
         self.logger.debug('ends')

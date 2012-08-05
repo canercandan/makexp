@@ -35,18 +35,19 @@ class Do(Browser):
     Ugly name I know but called like that for historical reasons
     """
 
-    def __init__(self, parser, browser=None, topic=None, other_topic=None):
+    def __init__(self, parser, browser=None, workdir=None, other_workdir=None):
         Browser.__init__(self, parser, browser)
 
         self.datename = str(datetime.today())
         for char in [' ', ':', '-', '.']: self.datename = self.datename.replace(char, '_')
 
-        parser.add_option('-t', '--topic', default=topic, help='give here an experience path to use')
-        parser.add_option('-O', '--other_topic', default=other_topic, help='give here another experience path to compare with the current one')
+        parser.add_option('-w', '--working_directory', dest='workdir', default=workdir, help='Working directory where the experiments will be done.')
+        parser.add_option('-c', '--compare_with', dest='other_workdir', default=other_workdir, help='Another working directory to compare with the current one.')
+
 
     def browse(self, options, tree):
-        if not options.topic:
-            raise ValueError('option --topic (-t) is missing')
+        if not options.workdir:
+            raise ValueError('option --working_directory (-w) is missing')
 
         def makedirs(dirname):
             try:
@@ -85,11 +86,11 @@ class Do(Browser):
                     '--status=%(RES_FILENAME)s.status '\
                     '> %(RES_FILENAME)s',
 
-                'RESDIR_PATTERN': '%(TOPIC)s/Res',
-                'TIMEDIR_PATTERN': '%(TOPIC)s/Time',
-                'STATDIR_PATTERN': '%(TOPIC)s/Stat',
-                'MAKEXPDIR_PATTERN': '%(TOPIC)s/makexp_%(DATENAME)s',
-                'GRAPHDIR_PATTERN': '%(TOPIC)s/graph_%(DATENAME)s',
+                'RESDIR_PATTERN': '%(WORKDIR)s/Res',
+                'TIMEDIR_PATTERN': '%(WORKDIR)s/Time',
+                'STATDIR_PATTERN': '%(WORKDIR)s/Stat',
+                'MAKEXPDIR_PATTERN': '%(WORKDIR)s/makexp_%(DATENAME)s',
+                'GRAPHDIR_PATTERN': '%(WORKDIR)s/graph_%(DATENAME)s',
 
                 'SAMPLES': [],
                 'NRUNS': 1,
@@ -133,27 +134,27 @@ class Do(Browser):
             t['MAKEXPDIR'] = '%(MAKEXPDIR_PATTERN)s' % t % t
             t['GRAPHDIR'] = '%(GRAPHDIR_PATTERN)s' % t % t
 
-        tree['TOPIC'] = options.topic
-        tree['OTHER_TOPIC'] = options.other_topic
+        tree['WORKDIR'] = options.workdir
+        tree['OTHER_WORKDIR'] = options.other_workdir
         tree['DATENAME'] = self.datename
 
-        if not os.path.isdir(tree['TOPIC']):
-            makedirs(tree['TOPIC'])
-            shutil.copy2('default_variables.py', '%(TOPIC)s/variables.py' % tree)
-            self.logger.info('the topic (directory) %(TOPIC)s was just created take your time to configure it and run it again.' % tree)
+        if not os.path.isdir(tree['WORKDIR']):
+            makedirs(tree['WORKDIR'])
+            shutil.copy2('default_variables.py', '%(WORKDIR)s/variables.py' % tree)
+            self.logger.info('The working directory %(WORKDIR)s was just created take your time to configure it and run it again.' % tree)
             return
 
         inittree(tree)
-        tree.update(eval(''.join(open('%(TOPIC)s/variables.py' % tree).readlines())))
+        tree.update(eval(''.join(open('%(WORKDIR)s/variables.py' % tree).readlines())))
         filltree(tree)
 
-        if options.other_topic:
+        if options.other_workdir:
             tree['OTHER'] = otree = {}
-            otree['TOPIC'] = options.other_topic
+            otree['WORKDIR'] = options.other_workdir
             otree['DATENAME'] = self.datename
 
             inittree(otree)
-            otree.update(eval(''.join(open('%(TOPIC)s/variables.py' % otree).readlines())))
+            otree.update(eval(''.join(open('%(WORKDIR)s/variables.py' % otree).readlines())))
             filltree(otree)
 
         # create needed directories
@@ -169,11 +170,11 @@ class Do(Browser):
                       ]:
                 shutil.copy2("%s/%s" % (dirname, f), "%(MAKEXPDIR)s/" % tree)
 
-            open('%(TOPIC)s/COMMAND' % tree, 'w').write("%s\n" % ' '.join(sys.argv))
-            open('%(TOPIC)s/README' % tree, 'w').write(tree['DESCRIPTION'])
+            open('%(WORKDIR)s/COMMAND' % tree, 'w').write("%s\n" % ' '.join(sys.argv))
+            open('%(WORKDIR)s/README' % tree, 'w').write(tree['DESCRIPTION'])
 
-        if not os.path.isdir(tree['TOPIC']):
-            self.logger.error('the topic (directory) %(TOPIC)s doesnot exist.' % tree)
+        if not os.path.isdir(tree['WORKDIR']):
+            self.logger.error('The working directory %(WORKDIR)s doesnot exist.' % tree)
             return
 
         if tree['PLOT']: makedirs(tree['GRAPHDIR'])

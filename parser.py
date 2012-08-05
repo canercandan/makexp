@@ -43,7 +43,7 @@ import optparse, logging, sys
 
 class Parser(optparse.OptionParser):
     def __init__(self):
-        optparse.OptionParser.__init__(self)
+        optparse.OptionParser.__init__(self, usage="Usage: %prog [options] [WORKDIR] [OTHER_WORKDIR]")
 
         self.levels = {'debug': logging.DEBUG,
                        'info': logging.INFO,
@@ -52,9 +52,15 @@ class Parser(optparse.OptionParser):
                        'critical': logging.CRITICAL
                        }
 
-        self.add_option('-v', '--verbose', choices=[x for x in self.levels.keys()], default='info', help='set a verbose level, default: info')
-        self.add_option('-l', '--levels', action='store_true', default=False, help='list verbose levels')
-        self.add_option('-o', '--output', help='give an output filename for logging', default='')
+        self.add_option('-v', '--verbose', choices=[x for x in self.levels.keys()], default='info', help='Use this option to set the level of verbosity. Default: info')
+        self.add_option('-l', '--levels', action='store_true', default=False, help='List all the levels of verbosity.')
+        self.add_option('-o', '--output', help='If this option is on, all the logging messages are redirected to the defined filename.', default='')
+
+        self.add_option('-d', '--debug', action='store_const', const='debug', dest='verbose', help='Diplay all the messages.')
+        self.add_option('--info', action='store_const', const='info', dest='verbose', help='Diplay the info messages.')
+        self.add_option('--warning', action='store_const', const='warning', dest='verbose', help='Only diplay the warning and error messages.')
+        self.add_option('--error', action='store_const', const='error', dest='verbose', help='Only diplay the error messages')
+        self.add_option('-q', '--quiet', action='store_const', const='critical', dest='verbose', help='Quiet level of verbosity only displaying the critical error messages.')
 
     def _logging_config(self, level_name, filename=''):
         if (filename != ''):
@@ -78,6 +84,10 @@ class Parser(optparse.OptionParser):
 
     def __call__(self):
         options, args = self.parse_args()
+        nargs = len(args)
         if options.levels: self._list_verbose_levels()
         self._logging_config(options.verbose, options.output)
+        if nargs:
+            options.workdir = args[0]
+            if nargs > 1: options.other_workdir = args[1]
         return options

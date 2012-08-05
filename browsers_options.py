@@ -35,7 +35,7 @@ class Do(browser.Browser):
     Ugly name I know but called like that for historical reasons
     """
 
-    def __init__(self, parser, browser=None, topic=None, other_topic=None, execute=False, plot=False,
+    def __init__(self, parser, browser=None, workdir=None, other_workdir=None, execute=False, plot=False,
                  manglename_pattern='%(FIELD)s_%(COMMAND)s_%(SCHEMA)s_S%(POPSIZE)d_C%(CORESIZE)d',
                  timefilename_pattern='%(TIMEDIR)s/%(NAME)s_%(MANGLENAME)s.time.%(NUM)s',
                  resfilename_pattern='%(RESDIR)s/%(NAME)s_%(MANGLENAME)s.out.%(NUM)s',
@@ -68,8 +68,8 @@ class Do(browser.Browser):
         self.datename = str(datetime.today())
         for char in [' ', ':', '-', '.']: self.datename = self.datename.replace(char, '_')
 
-        parser.add_option('-t', '--topic', default=topic if topic else self.datename, help='give here a topic name used to create the folder')
-        parser.add_option('-O', '--other_topic', default=other_topic, help='give here another topic name used to compare with the current one')
+        parser.add_option('-w', '--working_directory', dest='workdir', default=workdir if workdir else self.datename, help='Working directory where the experiments will be done.')
+        parser.add_option('-c', '--compare_with', dest='other_workdir', default=other_workdir, help='Another working directory to compare with the current one.')
 
         parser.add_option('-e', '--execute', action='store_true', default=execute, help='execute experiences')
         parser.add_option('-p', '--plot', action='store_true', default=plot, help='plot data')
@@ -84,8 +84,8 @@ class Do(browser.Browser):
         parser.add_option('-d', '--description', default=description, help='give here a description of your experience. This is saved in README file')
 
     def browse(self, options, tree):
-        if not options.topic:
-            raise ValueError('option --topic (-t) is missing')
+        if not options.workdir:
+            raise ValueError('option --working_directory (-w) is missing')
 
         def makedirs(dirname):
             try:
@@ -93,20 +93,20 @@ class Do(browser.Browser):
             except OSError:
                 pass
 
-        tree['TOPIC'] = options.topic
-        tree['OTHER_TOPIC'] = options.other_topic
+        tree['WORKDIR'] = options.workdir
+        tree['OTHER_WORKDIR'] = options.other_workdir
         tree['DATENAME'] = self.datename
 
-        tree['RESDIR'] = '%(TOPIC)s/Res' % tree
-        tree['TIMEDIR'] = '%(TOPIC)s/Time' % tree
-        tree['MAKEXPDIR'] = '%(TOPIC)s/makexp_%(DATENAME)s' % tree
-        tree['GRAPHDIR'] = '%(TOPIC)s/graph_%(DATENAME)s' % tree
+        tree['RESDIR'] = '%(WORKDIR)s/Res' % tree
+        tree['TIMEDIR'] = '%(WORKDIR)s/Time' % tree
+        tree['MAKEXPDIR'] = '%(WORKDIR)s/makexp_%(DATENAME)s' % tree
+        tree['GRAPHDIR'] = '%(WORKDIR)s/graph_%(DATENAME)s' % tree
 
-        if options.other_topic:
-            tree['OTHER_RESDIR'] = '%(OTHER_TOPIC)s/Res' % tree
-            tree['OTHER_TIMEDIR'] = '%(OTHER_TOPIC)s/Time' % tree
-            tree['OTHER_MAKEXPDIR'] = '%(OTHER_TOPIC)s/makexp_%(DATENAME)s' % tree
-            tree['OTHER_GRAPHDIR'] = '%(OTHER_TOPIC)s/graph_%(DATENAME)s' % tree
+        if options.other_workdir:
+            tree['OTHER_RESDIR'] = '%(OTHER_WORKDIR)s/Res' % tree
+            tree['OTHER_TIMEDIR'] = '%(OTHER_WORKDIR)s/Time' % tree
+            tree['OTHER_MAKEXPDIR'] = '%(OTHER_WORKDIR)s/makexp_%(DATENAME)s' % tree
+            tree['OTHER_GRAPHDIR'] = '%(OTHER_WORKDIR)s/graph_%(DATENAME)s' % tree
 
         # create needed directories
         if options.execute:
@@ -121,11 +121,11 @@ class Do(browser.Browser):
                       ]:
                 shutil.copy2("%s/%s" % (dirname, f), "%(MAKEXPDIR)s/" % tree)
 
-            open('%(TOPIC)s/COMMAND' % tree, 'w').write("%s\n" % ' '.join(sys.argv))
-            open('%(TOPIC)s/README' % tree, 'w').write(options.description)
+            open('%(WORKDIR)s/COMMAND' % tree, 'w').write("%s\n" % ' '.join(sys.argv))
+            open('%(WORKDIR)s/README' % tree, 'w').write(options.description)
 
-        if not os.path.isdir(tree['TOPIC']):
-            self.logger.error('the topic (directory) %(TOPIC)s doesnot exist.' % tree)
+        if not os.path.isdir(tree['WORKDIR']):
+            self.logger.error('The working directory %(WORKDIR)s doesnot exist.' % tree)
             return
 
         if options.plot: makedirs(tree["GRAPHDIR"])
