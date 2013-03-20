@@ -64,10 +64,12 @@ class Do(Browser):
                 'STATFILENAME_PATTERN': '%(STATDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.stat',
                 'GRAPHFILENAME_PATTERN': '%(STATDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data',
                 'SEQ_RESFILENAME_PATTERN': '%(RESDIR)s/%(NAME)s_%(SEQ_MANGLENAME)s.out.%(NUM)s',
-                'TIMELIMIT_COMMAND_PATTERN': 'timelimit -t %(TIMELIMIT)d',
+                # 'TIMELIMIT_COMMAND_PATTERN': 'timelimit -t %(TIMELIMIT)d',
+                'TIMEOUT_COMMAND_PATTERN': 'timeout %(TIMEOUT)d',
                 'COMMAND_PATTERN':\
                     '/usr/bin/time -v -o %(TIME_FILENAME)s '\
-                    '%(TIMELIMIT_COMMAND)s '\
+                    # '%(TIMELIMIT_COMMAND)s '\
+                    '%(TIMEOUT_COMMAND)s '\
                     '%(MAKEXPDIR)s/%(COMMAND)s '\
                     '--seed=%(SEED)d '\
                     '--domain=%(DOMAIN)s '\
@@ -111,7 +113,8 @@ class Do(Browser):
                 'GENMIN': 10,
                 'GENSTEADY': 50,
                 'GENMAX': 1000,
-                'TIMELIMIT': 1800,
+                # 'TIMELIMIT': 1800,
+                'TIMEOUT': 1800,
 
                 'TITLE': None,
                 'XLABEL': None,
@@ -140,7 +143,7 @@ class Do(Browser):
 
         if not os.path.isdir(tree['WORKDIR']):
             makedirs(tree['WORKDIR'])
-            shutil.copy2('default_variables.py', '%(WORKDIR)s/variables.py' % tree)
+            shutil.copy('default_variables.py', '%(WORKDIR)s/variables.py' % tree)
             self.logger.info('The working directory %(WORKDIR)s was just created take your time to configure it and run it again.' % tree)
             return
 
@@ -168,7 +171,8 @@ class Do(Browser):
                       'tracers.py', 'tracers_options.py', 'tracers_variables.py',
                       'common.py', 'parser.py'
                       ]:
-                shutil.copy2("%s/%s" % (dirname, f), "%(MAKEXPDIR)s/" % tree)
+                print("%s/%s" % (dirname, f), "%(MAKEXPDIR)s/" % tree)
+                shutil.copy("%s/%s" % (dirname, f), "%(MAKEXPDIR)s/" % tree)
 
             open('%(WORKDIR)s/COMMAND' % tree, 'w').write("%s\n" % ' '.join(sys.argv))
             open('%(WORKDIR)s/README' % tree, 'w').write(tree['DESCRIPTION'])

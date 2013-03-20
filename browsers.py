@@ -168,7 +168,8 @@ class Restart(Browser):
     def browse(self, options, tree):
         tree['FIELD'] = 'RESTART' if tree['RESTART'] else ''
         tree['RUNMAX'] = 0 if tree['RESTART'] else 1
-        tree['TIMELIMIT_COMMAND'] = '%(TIMELIMIT_COMMAND_PATTERN)s' % tree % tree if tree['RESTART'] else ''
+        # tree['TIMELIMIT_COMMAND'] = '%(TIMELIMIT_COMMAND_PATTERN)s' % tree % tree if tree['RESTART'] else ''
+        tree['TIMEOUT_COMMAND'] = '%(TIMEOUT_COMMAND_PATTERN)s' % tree % tree if tree['RESTART'] else ''
 
         self.browseAll(tree)
 
@@ -179,9 +180,11 @@ class Starting(Browser):
     def browse(self, options, tree):
         tree['PROGRESSBAR_SIZE'] *= 2
 
-        for tree['FIELD'], tree['RUNMAX'], tree['TIMELIMIT_COMMAND'] in [
+        # for tree['FIELD'], tree['RUNMAX'], tree['TIMELIMIT_COMMAND'] in [
+        for tree['FIELD'], tree['RUNMAX'], tree['TIMEOUT_COMMAND'] in [
             ('', 1, ''),
-            ('RESTART', 0, '%(TIMELIMIT_COMMAND_PATTERN)s' % tree % tree)
+            # ('RESTART', 0, '%(TIMELIMIT_COMMAND_PATTERN)s' % tree % tree)
+            ('RESTART', 0, '%(TIMEOUT_COMMAND_PATTERN)s' % tree % tree)
             ]:
             self.browseAll(tree)
 
@@ -214,7 +217,7 @@ class Command(Browser):
 
         for tree['COMMAND'] in tree['BINARIES']:
             if tree['EXECUTE']:
-                shutil.copy2('%(BINARYPATH)s/%(COMMAND)s' % tree, '%(MAKEXPDIR)s/' % tree)
+                shutil.copy('%(BINARYPATH)s/%(COMMAND)s' % tree, '%(MAKEXPDIR)s/' % tree)
 
             self.browseAll(tree)
 
