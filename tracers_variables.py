@@ -121,11 +121,11 @@ class AbsoluteTimeProportions(Tracer):
             for tree['COMMAND'] in tree['BINARIES']:
                 axes = []
 
-                for k in xrange(len(self.ratetimes)):
+                for k in range(len(self.ratetimes)):
                     tree['TITLE'] = self.ratetimes[k]
                     ax = fig.add_subplot(1, len(self.ratetimes), k+1)
 
-                    for i in xrange(len(tree['SAMPLES'])):
+                    for i in range(len(tree['SAMPLES'])):
                         pos, color = tree['PROPERTIES'][i]
                         tree['NAME'] = tree['SAMPLES'][i][0]
 
@@ -136,14 +136,14 @@ class AbsoluteTimeProportions(Tracer):
 
                             data.append(eval(open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.time' % tree).readline()))
 
-                        r = ax.boxplot(data, positions=[x-pos for x in xrange(len(data))], widths=0.1)
+                        r = ax.boxplot(data, positions=[x-pos for x in range(len(data))], widths=0.1)
 
                         for value in r.values():
                             pl.setp(value, color=color)
 
                     if tree['LEGEND']:
                         if k == len(self.ratetimes)-1:
-                            ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], tree['PROPERTIES'][i][1]) for i in xrange(len(tree['SAMPLES']))]))
+                            ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], tree['PROPERTIES'][i][1]) for i in range(len(tree['SAMPLES']))]))
 
                     ax.set_xlabel('# populations')
                     ax.set_ylabel('Absolute time')
@@ -198,11 +198,11 @@ class AbsoluteTimeProportionsPerCores(Tracer):
             for tree['COMMAND'] in tree['BINARIES']:
                 axes = []
 
-                for k in xrange(len(self.ratetimes)):
+                for k in range(len(self.ratetimes)):
                     tree['TITLE'] = self.ratetimes[k]
                     ax = fig.add_subplot(1, len(self.ratetimes), k+1)
 
-                    for i in xrange(len(tree['SAMPLES'])):
+                    for i in range(len(tree['SAMPLES'])):
                         pos, color = tree['PROPERTIES'][i]
                         tree['NAME'] = tree['SAMPLES'][i][0]
 
@@ -213,14 +213,14 @@ class AbsoluteTimeProportionsPerCores(Tracer):
 
                             data.append(eval(open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.time' % tree).readline()))
 
-                        r = ax.boxplot(data, positions=[x-pos for x in xrange(len(data))], widths=0.1)
+                        r = ax.boxplot(data, positions=[x-pos for x in range(len(data))], widths=0.1)
 
                         for value in r.values():
                             pl.setp(value, color=color)
 
                     if tree['LEGEND']:
                         if k == len(self.ratetimes)-1:
-                            ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], tree['PROPERTIES'][i][1]) for i in xrange(len(tree['SAMPLES']))]))
+                            ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], tree['PROPERTIES'][i][1]) for i in range(len(tree['SAMPLES']))]))
 
                     ax.set_xlabel('# cores')
                     ax.set_ylabel('Absolute time')
@@ -313,11 +313,11 @@ class GlobalTimeSpeedup(Tracer):
             for tree['COMMAND'] in tree['BINARIES']:
                 otree['COMMAND'] = tree['COMMAND']
 
-                for k in xrange(len(self.ratetimes)):
+                for k in range(len(self.ratetimes)):
                     tree['TITLE'] = otree['TITLE'] = self.ratetimes[k]
                     ax = fig.add_subplot(1, len(self.ratetimes), k+1)
 
-                    for i in xrange(len(tree['SAMPLES'])):
+                    for i in range(len(tree['SAMPLES'])):
                         pos, color = tree['PROPERTIES'][i]
                         tree['NAME'] = otree['NAME'] = tree['SAMPLES'][i][0]
 
@@ -333,7 +333,7 @@ class GlobalTimeSpeedup(Tracer):
                             times = []
                             otimes = []
 
-                            for tree['NUM'] in xrange(1, tree['NRUNS']+1):
+                            for tree['NUM'] in range(1, tree['NRUNS']+1):
                                 otree['NUM'] = tree['NUM']
 
                                 tree['RES_FILENAME'] = '%(RESFILENAME_PATTERN)s' % tree % tree
@@ -381,11 +381,11 @@ class GlobalTimeSpeedup(Tracer):
                                     times.append(time)
                                     otimes.append(otime)
 
-                            for i in xrange(len(times)): otimes[i] /= times[i]
+                            for i in range(len(times)): otimes[i] /= times[i]
 
                             data.append(otimes)
 
-                        r = ax.boxplot(data, positions=[x-pos for x in xrange(len(data))], widths=0.1)
+                        r = ax.boxplot(data, positions=[x-pos for x in range(len(data))], widths=0.1)
 
                         for value in r.values():
                             pl.setp(value, color=color)
@@ -394,7 +394,7 @@ class GlobalTimeSpeedup(Tracer):
 
                     if tree['LEGEND']:
                         if k == len(self.ratetimes)-1:
-                            ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], tree['PROPERTIES'][i][1]) for i in xrange(len(tree['SAMPLES']))]))
+                            ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], tree['PROPERTIES'][i][1]) for i in range(len(tree['SAMPLES']))]))
 
                     ax.set_title('%(TITLE)s' % tree)
 
@@ -443,7 +443,7 @@ class GlobalEfficiency(Tracer):
             for tree['COMMAND'] in tree['BINARIES']:
                 ax = fig.add_subplot(111)
 
-                for i in xrange(len(tree['SAMPLES'])):
+                for i in range(len(tree['SAMPLES'])):
                     pos, color = tree['PROPERTIES'][i]
                     tree['NAME'] = tree['SAMPLES'][i][0]
 
@@ -454,7 +454,7 @@ class GlobalEfficiency(Tracer):
 
                         data.append(eval(open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data' % tree).readline()))
 
-                    r = ax.boxplot(data, positions=[x-pos for x in xrange(len(data))], widths=0.1)
+                    r = ax.boxplot(data, positions=[x-pos for x in range(len(data))], widths=0.1)
 
                     for value in r.values():
                         pl.setp(value, color=color)
@@ -519,7 +519,7 @@ class MultiInstance(Tracer):
             for tree['COMMAND'] in tree['BINARIES']:
                 ax = fig.add_subplot(111)
 
-                for i in xrange(len(tree['SAMPLES'])):
+                for i in range(len(tree['SAMPLES'])):
                     pos, color = tree['PROPERTIES'][i]
                     tree['NAME'] = tree['SAMPLES'][i][0]
 
@@ -531,7 +531,7 @@ class MultiInstance(Tracer):
 
                         data.append(eval(open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.data' % tree).readline()))
 
-                    r = ax.boxplot(data, positions=[x-pos for x in xrange(len(data))], widths=0.1)
+                    r = ax.boxplot(data, positions=[x-pos for x in range(len(data))], widths=0.1)
 
                     for value in r.values():
                         pl.setp(value, color=color)

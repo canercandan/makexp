@@ -134,7 +134,7 @@ class SpeedUp(Stat):
 
         diffs = []
 
-        for tree['NUM'] in xrange(1, options.nruns+1):
+        for tree['NUM'] in range(1, options.nruns+1):
             tree['TIME_FILENAME'] = options.timefilename_pattern % tree
 
             idx = self.idx
@@ -171,7 +171,7 @@ class Efficiency(Stat):
 
         diffs = []
 
-        for tree['NUM'] in xrange(1, options.nruns+1):
+        for tree['NUM'] in range(1, options.nruns+1):
             tree['TIME_FILENAME'] = options.timefilename_pattern % tree
 
             idx = self.idx
@@ -217,7 +217,7 @@ class ElapsedTime(Stat):
 
         times = []
 
-        for tree['NUM'] in xrange(1, options.nruns+1):
+        for tree['NUM'] in range(1, options.nruns+1):
             tree['RES_FILENAME'] = options.resfilename_pattern % tree
 
             data = open(tree['RES_FILENAME']).readlines()
@@ -297,7 +297,7 @@ class ElapsedTimeCommand(Stat):
 
         times = []
 
-        for tree['NUM'] in xrange(1, options.nruns+1):
+        for tree['NUM'] in range(1, options.nruns+1):
             tree['RES_FILENAME'] = options.resfilename_pattern % tree
             tree['TIME_FILENAME'] = options.timefilename_pattern % tree
 

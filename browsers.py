@@ -259,7 +259,7 @@ class ProgressBar(Browser):
         tree['PROGRESSBAR_TODOCHARS'] = ' ' * int((100 - int(tree['PROGRESSBAR_POSITION'])) / 2)
         tree['PROGRESSBAR_VISUAL'] = '%(PROGRESSBAR_DONECHARS)s%(PROGRESSBAR_TODOCHARS)s' % tree
 
-        print('\rMAKexp:\t%(PROGRESSBAR_VISUAL)s\t%(PROGRESSBAR_POSITION)d %%' % tree, end=' ')
+        # print('\rMAKexp:\t%(PROGRESSBAR_VISUAL)s\t%(PROGRESSBAR_POSITION)d %%' % tree, end=' ')
 
         self.browseAll(tree)
 

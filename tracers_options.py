@@ -112,11 +112,11 @@ class AbsoluteTimeProportions(Tracer):
 
         for tree['CORESIZE'] in tree['CORESIZES']:
             for tree['COMMAND'] in tree['BINARIES']:
-                for k in xrange(len(self.ratetimes)):
+                for k in range(len(self.ratetimes)):
                     tree['TITLE'] = self.ratetimes[k]
                     ax = fig.add_subplot(1, len(self.ratetimes), k+1)
 
-                    for i in xrange(len(tree['SAMPLES'])):
+                    for i in range(len(tree['SAMPLES'])):
                         pos, color = self.properties[i]
                         tree['NAME'] = tree['SAMPLES'][i][0]
 
@@ -125,7 +125,7 @@ class AbsoluteTimeProportions(Tracer):
                         for tree['POPSIZE'] in tree['POPSIZES']:
                             data.append(eval(open('%(GRAPHDIR)s/%(TITLE)s_%(NAME)s_%(MANGLENAME)s.time' % tree).readline()))
 
-                        r = ax.boxplot(data, positions=[x-pos for x in xrange(len(data))], widths=0.1)
+                        r = ax.boxplot(data, positions=[x-pos for x in range(len(data))], widths=0.1)
 
                         for value in r.values():
                             pl.setp(value, color=color)
@@ -134,7 +134,7 @@ class AbsoluteTimeProportions(Tracer):
 
                     if self.legend:
                         if k == len(self.ratetimes)-1:
-                            ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], self.properties[i][1]) for i in xrange(len(tree['SAMPLES']))]))
+                            ax.legend(tuple(['%s(%s)' % (tree['SAMPLES'][i][0], self.properties[i][1]) for i in range(len(tree['SAMPLES']))]))
 
                     ax.set_title('%(TITLE)s' % tree)
                     ax.set_xlabel('# populations')
